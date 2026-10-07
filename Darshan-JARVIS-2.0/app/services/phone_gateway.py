@@ -11,6 +11,7 @@ import hashlib
 import hmac
 import html
 import os
+from urllib.parse import quote
 from pathlib import Path
 
 import httpx
