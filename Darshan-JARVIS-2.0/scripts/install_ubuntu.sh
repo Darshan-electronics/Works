@@ -26,7 +26,7 @@ cd "$JARVIS_DIR"
 
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip wheel
+python -m pip install --upgrade pip wheel typeguard
 python -m pip install -r requirements.txt
 
 mkdir -p data jarvis_projects logs
@@ -39,7 +39,7 @@ echo
 echo "=== Installed versions ==="
 python --version
 git --version
-command -v kicad && kicad --version || true
+command -v kicad && kicad --help >/dev/null && echo "KiCad GUI: installed" || true
 command -v kicad-cli && kicad-cli version || true
 command -v verilator && verilator --version || true
 command -v iverilog && iverilog -V 2>&1 | head -n 1 || true
