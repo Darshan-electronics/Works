@@ -11,6 +11,9 @@ from .services.web_research import search_web
 from .services.work_engine import create_project
 from .services.trading_engine import TradingEngine
 from .services.quantum_engine import service_status as quantum_status, analyze_algorithm, quantum_vlsi_plan, bell_state
+from .services.trading_analysis import load_csv, run_paper_cycle, daily_report, technical_snapshot, walk_forward_sma, paper_signal, fetch_csv_url, normalize_ohlcv, backtest_sma_cross, compare_strategies
+from .services.trading_engine import TradingEngine
+from .services.quantum_engine import service_status as quantum_status, analyze_algorithm, quantum_vlsi_plan, bell_state
 from .services.trading_engine import TradingEngine
 from .services.quantum_engine import available_backends, bell_state, analyze_algorithm, quantum_vlsi_plan
 
