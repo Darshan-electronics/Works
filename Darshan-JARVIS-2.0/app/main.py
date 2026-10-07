@@ -200,6 +200,26 @@ async def evaluate_alert(req: AlertRequest, authorization: str | None = Header(d
 class WorkRequest(BaseModel):
     request: str = Field(min_length=5, max_length=12000)
 
+@app.get("/quantum/status")
+def quantum_backend_status():
+    return quantum_status()
+
+
+@app.post("/quantum/analyze")
+def quantum_analyze(req: WorkRequest):
+    return analyze_algorithm(req.request)
+
+
+@app.post("/quantum/vlsi-plan")
+def quantum_vlsi(req: WorkRequest):
+    return quantum_vlsi_plan(req.request)
+
+
+@app.post("/quantum/bell")
+def quantum_bell():
+    return bell_state()
+
+
 @app.post("/artifacts/project")
 async def create_artifacts(req: WorkRequest, authorization: str | None = Header(default=None)):
     auth(authorization)
