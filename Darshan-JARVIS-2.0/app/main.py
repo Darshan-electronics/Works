@@ -9,6 +9,8 @@ from .knowledge import init_knowledge, remember, search_knowledge
 from .memory import add_memory, search_memories, audit
 from .services.web_research import search_web
 from .services.work_engine import create_project
+from .services.trading_engine import TradingEngine
+from .services.quantum_engine import available_backends, bell_state, analyze_algorithm, quantum_vlsi_plan
 
 app = FastAPI(title="Darshan JARVIS 2.0")
 mobile_clients: set[WebSocket] = set()
@@ -40,7 +42,7 @@ def startup():
 
 @app.get("/health")
 def health():
-    return {"ok": True, "ai": __import__("os").getenv("AI_PROVIDER", "openai"),
+    return {"ok": True, "ai": __import__("os").getenv("AI_PROVIDER", "ollama"),
             "web_research": WEB_RESEARCH_ENABLED}
 
 @app.get("/")
@@ -307,7 +309,7 @@ def trading_history(limit: int = 50):
 
 @app.get("/quantum/status")
 def quantum_backend_status():
-    return quantum_status()
+    return {"available": True, "backends": available_backends()}
 
 
 @app.post("/quantum/analyze")
