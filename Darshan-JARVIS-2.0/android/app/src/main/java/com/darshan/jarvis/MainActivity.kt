@@ -41,7 +41,7 @@ class MainActivity : Activity() {
         root.addView(token)
         root.addView(Button(this).apply {
             text="Connect to JARVIS"
-            setOnClickListener { output.text="Connection settings loaded. Server: " + server.text }
+            setOnClickListener { saveAndTest() }
         })
         root.addView(label("Device capabilities"))
         root.addView(Button(this).apply {
