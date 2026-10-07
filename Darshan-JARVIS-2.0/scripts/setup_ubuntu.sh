@@ -44,7 +44,7 @@ import secrets
 p=Path(".env")
 lines=p.read_text().splitlines() if p.exists() else []
 token=next((x.split("=",1)[1] for x in lines if x.startswith("JARVIS_ACCESS_TOKEN=") and "=" in x), "")
-if not token:
+if not token or token == "generate_a_long_random_token" or len(token) < 32:
     out=[]
     found=False
     for line in lines:
@@ -75,12 +75,13 @@ ollama --version
 python -c "import qiskit,qiskit_aer; print('Qiskit: OK'); print('Qiskit Aer: OK')"
 
 if ss -ltn 2>/dev/null | grep -q ':8787 '; then
-  echo "JARVIS is already running."
-else
-  nohup "$ROOT/.venv/bin/uvicorn" app.main:app --host 127.0.0.1 --port 8787 >"$ROOT/logs/jarvis.log" 2>&1 &
-  echo $! >"$ROOT/logs/jarvis.pid"
+  echo "Restarting existing JARVIS process..."
+  pkill -f "$ROOT/.venv/bin/uvicorn app.main:app" || true
   sleep 2
 fi
+nohup "$ROOT/.venv/bin/uvicorn" app.main:app --host 127.0.0.1 --port 8787 >"$ROOT/logs/jarvis.log" 2>&1 &
+echo $! >"$ROOT/logs/jarvis.pid"
+sleep 3
 
 curl -fsS http://127.0.0.1:8787/health >/dev/null || { echo "JARVIS failed. See logs/jarvis.log"; exit 1; }
 echo
