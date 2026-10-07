@@ -1,63 +1,144 @@
 # DARSHAN JARVIS 2.0
 
-A local-first engineering AI dashboard for Ubuntu: Ollama/Qwen, web research, persistent knowledge, VLSI/HDL tools, KiCad project generation, quantum engineering with Qiskit/Aer, paper trading, Android integration foundation, alerts/telephony adapters, and document/project artifact generation.
+A local-first personal engineering AI for **Ubuntu** with a holographic orange JARVIS dashboard.
 
-## One-command Ubuntu setup
+## One-command install
 
-Clone the repository, enter the JARVIS directory, and run the installer:
+On a fresh Ubuntu machine:
 
-    git clone https://github.com/Darshan-electronics/Works.git
-    cd Works/Darshan-JARVIS-2.0
-    chmod +x scripts/*.sh
-    ./scripts/install.sh
+```bash
+git clone https://github.com/Darshan-electronics/Works.git ~/Works
+cd ~/Works/Darshan-JARVIS-2.0
+bash scripts/setup_ubuntu.sh
+```
 
-The installer installs Ubuntu dependencies, Ollama, Qwen 3.5 9B, embeddinggemma, Python dependencies, Qiskit/Aer, Verilator, Icarus Verilog, Yosys and KiCad when available; creates a strong local token; validates the application; starts JARVIS; and opens the dashboard.
+The installer:
 
-Dashboard: http://127.0.0.1:8787
+- installs the Ubuntu/Python build dependencies
+- installs/updates KiCad CLI, Verilator, Icarus Verilog and Yosys where available
+- installs Ollama
+- creates a Python virtual environment
+- installs JARVIS Python dependencies
+- installs Qiskit + Qiskit Aer
+- pulls Qwen 3.5 9B and embeddinggemma
+- creates a local `.env` with a random bearer token if one is missing
+- validates the Python source
+- starts JARVIS on `127.0.0.1:8787`
+- opens the dashboard automatically
+
+After installation, open:
+
+```
+http://127.0.0.1:8787
+```
+
+If JARVIS is already running, the installer keeps the existing process and opens the dashboard.
 
 ## Dashboard
 
-The dashboard is a dark orange holographic/HUD-style interface inspired by the supplied JARVIS visual: a central glowing engineering core with system telemetry, VLSI/PCB controls, quantum controls, paper-trading telemetry, and authenticated local chat.
+The dashboard is intentionally styled around the supplied reference: black HUD, glowing orange/gold central AI core, scan line, technical grid, telemetry panels and command tabs.
 
-## Current capabilities
+It provides:
 
-- Local Ollama/Qwen AI and embeddinggemma
-- SQLite FTS5 knowledge and approved memory
-- Optional SearXNG web research
-- VLSI/HDL environment: KiCad, Yosys, Verilator, Icarus Verilog
-- Project Factory: DOCX, PDF, PPTX, SVG architecture, BOM and KiCad PCB draft
-- Quantum Engineering: Qiskit, Aer, Bell simulation and quantum-VLSI planning
-- Paper trading with risk limits and history
-- Android companion foundation
-- Authenticated alerts and phone/voice adapters
+- Command Center / JARVIS chat
+- Engineering Project Factory
+- VLSI / ASIC workbench
+- Quantum Engineering
+- Qiskit Bell-state simulation
+- Paper Trading telemetry
+- Research / Knowledge acquisition
+- server and AI status
 
-## Trading safety
+The browser stores the bearer token in session storage only.
 
-The default account is a $20 paper account. Live-money execution is not enabled. A daily profit target never forces a trade.
+## Engineering Factory
+
+JARVIS can generate an engineering project package containing:
+
+- project plan JSON
+- BOM CSV
+- architecture SVG
+- PCB draft
+- DOCX report
+- PDF report
+- PPTX presentation
+- validation report
+
+PCB output is a **draft**. Verify footprints, pin mapping, ERC/DRC, power integrity and manufacturing files before fabrication.
+
+## VLSI / ASIC
+
+The Ubuntu stack is prepared for:
+
+- SystemVerilog / Verilog
+- Icarus Verilog
+- Verilator
+- Yosys
+- KiCad
+- OpenROAD/OpenLane planning
+
+Vendor tools such as Vivado, Quartus and STM32CubeIDE may require separate downloads/licensing.
+
+## Quantum Engineering
+
+JARVIS includes:
+
+- Qiskit
+- Qiskit Aer
+- quantum algorithm analysis
+- Bell-state simulation
+- quantum-VLSI planning
+- control/readout architecture planning
+- FPGA/ASIC partitioning concepts
+
+Hardware execution still requires the appropriate physical quantum platform.
+
+## Trading
+
+The current trading system is **paper trading only**. It includes a default $20 paper account, risk controls, backtesting infrastructure, paper positions and history.
+
+It does **not** guarantee profits and does not place real-money orders.
 
 ## Security
 
-JARVIS binds to 127.0.0.1 by default. Do not expose Ollama port 11434 or JARVIS port 8787 directly through router port forwarding. For remote access, use an authenticated private overlay such as Tailscale.
+Default network binding is localhost:
 
-Never commit .env, API keys, phone credentials, broker credentials, or private tokens.
+```
+127.0.0.1:8787
+```
 
-## Manual start
+Do not expose port 8787 or Ollama port 11434 directly to the public Internet. For remote Android access, use a private authenticated tunnel such as Tailscale and keep the JARVIS bearer token secret.
 
-    cd ~/Works/Darshan-JARVIS-2.0
-    source .venv/bin/activate
-    ./scripts/start.sh
+Consequential actions require confirmation. Phone/financial integrations remain optional.
 
-Then open http://127.0.0.1:8787.
+## Useful commands
 
-## Logs
+Start manually:
 
-    tail -f logs/jarvis.log
-    tail -f logs/ollama.log
+```bash
+cd ~/Works/Darshan-JARVIS-2.0
+source .venv/bin/activate
+./scripts/start.sh
+```
 
-## Important limitation
+View logs:
 
-JARVIS learns through retrieval and source-backed notes; it does not silently retrain model weights or rewrite its own security policy. Engineering outputs, especially PCB drafts, must be validated before fabrication.
+```bash
+tail -f logs/jarvis.log
+```
 
-## Ubuntu
+Health check:
 
-This repository is configured for Ubuntu, not Rocky Linux. Use apt, Ubuntu paths, and scripts/install.sh.
+```bash
+curl http://127.0.0.1:8787/health
+```
+
+Stop the background process created by the installer:
+
+```bash
+kill "$(cat logs/jarvis.pid)"
+```
+
+## Repository
+
+`Darshan-JARVIS-2.0/` is the complete Ubuntu host application. The Android companion is under `android/`.
