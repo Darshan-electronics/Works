@@ -3,7 +3,7 @@ from fastapi import FastAPI, Header, HTTPException, WebSocket, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
-from .config import get_access_token, get_web_research_enabled, get_searxng_url
+from .config import get_access_token, get_web_research_enabled, get_searxng_url, get_searxng_urls
 from .ai import answer, learn_from_research
 from .knowledge import init_knowledge, remember, search_knowledge
 from .memory import add_memory, search_memories, audit
@@ -55,19 +55,23 @@ def health():
 @app.get("/research/status")
 async def research_status():
     enabled = get_web_research_enabled()
-    url = get_searxng_url()
+    urls = get_searxng_urls()
     reachable = False
+    active_url = ""
     error = ""
     if enabled:
-        try:
-            import httpx
-            async with httpx.AsyncClient(timeout=3, follow_redirects=True) as client:
-                r = await client.get(url + "/search", params={"q": "JARVIS", "format": "json"})
-                r.raise_for_status()
-                reachable = True
-        except Exception as exc:
-            error = f"{type(exc).__name__}: {exc}"
-    return {"enabled": enabled, "reachable": reachable, "url": url, "ready": enabled and reachable, "error": error}
+        import httpx
+        for url in urls:
+            try:
+                async with httpx.AsyncClient(timeout=3, follow_redirects=True) as client:
+                    r = await client.get(url + "/search", params={"q": "JARVIS", "format": "json"})
+                    r.raise_for_status()
+                    reachable = True
+                    active_url = url
+                    break
+            except Exception as exc:
+                error = f"{type(exc).__name__}: {exc}"
+    return {"enabled": enabled, "reachable": reachable, "url": active_url or urls[0], "candidates": urls, "ready": enabled and reachable, "error": error}
 
 @app.get("/")
 def index():
