@@ -42,7 +42,7 @@ input,textarea{width:100%;background:#050505;color:#ffe8d2;border:1px solid #4b2
 <div class="tabs"><button class="active" onclick="show('command',this)">COMMAND</button><button onclick="show('engineering',this)">ENGINEERING</button><button onclick="show('vlsi',this)">VLSI / ASIC</button><button onclick="show('quantum',this)">QUANTUM</button><button onclick="show('trading',this)">PAPER TRADING</button><button onclick="show('learning',this)">LEARNING</button><button onclick="show('selfmod',this)">SELF-MODIFICATION</button></div>
 
 <section id="command" class="section active"><div class="cards">
-<div class="card c8"><div class="muted">JARVIS COMMAND CONSOLE</div><h2>What do you want me to do?</h2><textarea id="msg" rows="5" placeholder="Design a VLSI accelerator... Create a PCB... Explain a quantum architecture..."></textarea><div class="row"><button class="btn" onclick="chat()">EXECUTE COMMAND</button><button class="btn" onclick="toggleVoice(this)">🔊 VOICE ON</button><button class="btn" onclick="stopSpeaking()">STOP VOICE</button></div><pre id="chatout">Awaiting command...</pre></div>
+<div class="card c8"><div class="muted">JARVIS COMMAND CONSOLE</div><h2>What do you want me to do?</h2><textarea id="msg" rows="5" placeholder="Design a VLSI accelerator... Create a PCB... Explain a quantum architecture..."></textarea><div class="row"><button class="btn" onclick="chat()">EXECUTE COMMAND</button><button class="btn" id="listenBtn" onclick="toggleListening()">🎤 START LISTENING</button><button class="btn" onclick="toggleVoice(this)">🔊 VOICE ON</button><button class="btn" onclick="stopSpeaking()">STOP VOICE</button></div><pre id="chatout">Awaiting command...</pre></div>
 <div class="card c4"><div class="muted">System Telemetry</div><p>AI: <b id="ai">—</b></p><p>Web Research: <b id="web">—</b></p><p>Quantum: <b id="qstate">—</b></p><p>Paper Equity: <b id="equity0">—</b></p></div>
 </div></section>
 
@@ -108,6 +108,71 @@ function toggleVoice(button){
   if(!voiceEnabled) stopSpeaking();
 }
 function stopSpeaking(){if("speechSynthesis" in window) speechSynthesis.cancel()}
+
+let recognition=null;
+let listening=false;
+let speechSupported=false;
+
+function initSpeechRecognition(){
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    $("listenBtn").textContent="🎤 MIC NOT SUPPORTED";
+    $("listenBtn").disabled=true;
+    return;
+  }
+  speechSupported=true;
+  recognition=new SpeechRecognition();
+  recognition.lang="en-IN";
+  recognition.continuous=false;
+  recognition.interimResults=true;
+  recognition.maxAlternatives=1;
+
+  recognition.onstart=()=>{
+    listening=true;
+    $("listenBtn").textContent="🛑 STOP LISTENING";
+    $("chatout").textContent="Listening...";
+  };
+  recognition.onresult=(event)=>{
+    let text="";
+    for(let i=event.resultIndex;i<event.results.length;i++){
+      text+=event.results[i][0].transcript;
+    }
+    $("msg").value=text.trim();
+    if(event.results[event.results.length-1].isFinal){
+      $("chatout").textContent="Heard: "+text.trim();
+    }
+  };
+  recognition.onerror=(event)=>{
+    listening=false;
+    $("listenBtn").textContent="🎤 START LISTENING";
+    const messages={
+      "not-allowed":"Microphone permission was denied. Allow microphone access for JARVIS in Ubuntu/Electron.",
+      "audio-capture":"No working microphone was detected.",
+      "network":"Speech recognition service is unavailable.",
+      "no-speech":"No speech was detected."
+    };
+    $("chatout").textContent=messages[event.error]||("Microphone error: "+event.error);
+  };
+  recognition.onend=()=>{
+    listening=false;
+    $("listenBtn").textContent="🎤 START LISTENING";
+  };
+}
+
+function toggleListening(){
+  if(!speechSupported) return;
+  if(listening){
+    recognition.stop();
+    return;
+  }
+  try{
+    recognition.start();
+  }catch(e){
+    $("chatout").textContent="Could not start microphone: "+e.message;
+  }
+}
+
+
 function speak(text){
   if(!voiceEnabled || !("speechSynthesis" in window)) return;
   stopSpeaking();
@@ -181,6 +246,6 @@ async function decideCode(id,approved){
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 
-connect();setInterval(connect,15000);
+initSpeechRecognition();\nconnect();setInterval(connect,15000);
 </script>
 </body></html>
