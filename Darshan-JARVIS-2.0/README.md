@@ -35,3 +35,25 @@ JARVIS grows through approved memories, selected GitHub/local project indexing, 
 
 ## Future adapters
 Native Android controls, telephony ("call JARVIS"), broker execution, richer defensive containment, notifications and automatic project indexing.
+
+## Offline AI + knowledge
+JARVIS can run locally with Ollama, so normal inference does not require a cloud AI API. The setup script installs Ollama and downloads Qwen3.5 9B plus embeddinggemma. Live web research is optional.
+
+The knowledge layer is retrieval-based: JARVIS can save approved notes and research results in its local knowledge database and retrieve them later. This is safer than silently retraining model weights after every question.
+
+## Public internet access
+Keep JARVIS on 127.0.0.1. Tailscale Serve is private to your tailnet; Tailscale Funnel is the public-internet option. If using Funnel, keep the JARVIS bearer token enabled, require confirmation for high-risk actions, and never expose Ollama port 11434 directly.
+
+Example after JARVIS is running on port 8787:
+```bash
+tailscale funnel 8787
+```
+
+## Rocky Linux offline setup
+```bash
+./scripts/setup_offline_ai.sh
+cp .env.example .env
+openssl rand -hex 32
+# put the generated value into JARVIS_ACCESS_TOKEN in .env
+./scripts/start.sh
+```
