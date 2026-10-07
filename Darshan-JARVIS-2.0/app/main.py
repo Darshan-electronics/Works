@@ -3,7 +3,7 @@ from fastapi import FastAPI, Header, HTTPException, WebSocket, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
-from .config import ACCESS_TOKEN, WEB_RESEARCH_ENABLED, SEARXNG_URL
+from .config import get_access_token, get_web_research_enabled, get_searxng_url
 from .ai import answer, learn_from_research
 from .knowledge import init_knowledge, remember, search_knowledge
 from .memory import add_memory, search_memories, audit
@@ -36,9 +36,10 @@ class LearnRequest(BaseModel):
     save: bool = True
 
 def auth(authorization: str | None):
-    if not ACCESS_TOKEN:
+    token = get_access_token()
+    if not token:
         raise HTTPException(503, "JARVIS_ACCESS_TOKEN is not configured")
-    if authorization != f"Bearer {ACCESS_TOKEN}":
+    if authorization != f"Bearer {token}":
         raise HTTPException(401, "Invalid JARVIS token")
 
 @app.on_event("startup")
@@ -49,7 +50,24 @@ def startup():
 @app.get("/health")
 def health():
     return {"ok": True, "ai": __import__("os").getenv("AI_PROVIDER", "ollama"),
-            "web_research": WEB_RESEARCH_ENABLED}
+            "web_research": get_web_research_enabled()}
+
+@app.get("/research/status")
+async def research_status():
+    enabled = get_web_research_enabled()
+    url = get_searxng_url()
+    reachable = False
+    error = ""
+    if enabled:
+        try:
+            import httpx
+            async with httpx.AsyncClient(timeout=3, follow_redirects=True) as client:
+                r = await client.get(url + "/search", params={"q": "JARVIS", "format": "json"})
+                r.raise_for_status()
+                reachable = True
+        except Exception as exc:
+            error = f"{type(exc).__name__}: {exc}"
+    return {"enabled": enabled, "reachable": reachable, "url": url, "ready": enabled and reachable, "error": error}
 
 @app.get("/")
 def index():
@@ -61,9 +79,10 @@ def ui_session(request: Request):
     host = request.client.host if request.client else ""
     if host not in {"127.0.0.1", "::1", "localhost"}:
         raise HTTPException(403, "Dashboard session bootstrap is local-only")
-    if not ACCESS_TOKEN:
+    token = get_access_token()
+    if not token:
         raise HTTPException(503, "JARVIS_ACCESS_TOKEN is not configured")
-    return {"token": ACCESS_TOKEN}
+    return {"token": token}
 
 @app.post("/chat")
 async def chat(req: ChatRequest, authorization: str | None = Header(default=None)):
@@ -78,9 +97,9 @@ async def chat(req: ChatRequest, authorization: str | None = Header(default=None
 @app.post("/learn")
 async def learn(req: LearnRequest, authorization: str | None = Header(default=None)):
     auth(authorization)
-    if not WEB_RESEARCH_ENABLED:
-        raise HTTPException(503, "Web research is disabled")
-    results = await search_web(req.topic, SEARXNG_URL)
+    if not get_web_research_enabled():
+        raise HTTPException(503, "Web research is disabled in JARVIS configuration")
+    results = await search_web(req.topic, get_searxng_url())
     if not results:
         raise HTTPException(502, "No research results. Check SearXNG.")
     note = await learn_from_research(req.topic, results)
@@ -103,7 +122,8 @@ class PhoneCallRequest(BaseModel):
 @app.websocket("/mobile/events")
 async def mobile_events(websocket: WebSocket):
     auth_header = websocket.headers.get("authorization")
-    if not ACCESS_TOKEN or auth_header != "Bearer " + ACCESS_TOKEN:
+    token = get_access_token()
+    if not token or auth_header != "Bearer " + token:
         await websocket.close(code=1008, reason="Unauthorized")
         return
     await websocket.accept()
