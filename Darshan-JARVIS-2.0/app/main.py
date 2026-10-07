@@ -1,5 +1,5 @@
 from pathlib import Path
-from fastapi import FastAPI, Header, HTTPException, WebSocket
+from fastapi import FastAPI, Header, HTTPException, WebSocket, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
@@ -53,6 +53,16 @@ def health():
 @app.get("/")
 def index():
     return FileResponse(Path(__file__).resolve().parent.parent / "frontend" / "index.html")
+
+@app.get("/ui/session")
+def ui_session(request: Request):
+    """Issue the local API token to the dashboard only when JARVIS is bound to localhost."""
+    host = request.client.host if request.client else ""
+    if host not in {"127.0.0.1", "::1", "localhost"}:
+        raise HTTPException(403, "Dashboard session bootstrap is local-only")
+    if not ACCESS_TOKEN:
+        raise HTTPException(503, "JARVIS_ACCESS_TOKEN is not configured")
+    return {"token": ACCESS_TOKEN}
 
 @app.post("/chat")
 async def chat(req: ChatRequest, authorization: str | None = Header(default=None)):
