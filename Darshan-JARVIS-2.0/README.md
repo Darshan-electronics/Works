@@ -125,3 +125,15 @@ For remote Android access, use a private authenticated overlay such as Tailscale
 ```
 https://github.com/Darshan-electronics/Works/tree/main/Darshan-JARVIS-2.0
 ```
+
+
+## Standalone desktop app
+
+After installation, launch **DARSHAN JARVIS 2.0** from the Ubuntu application menu, or run:
+
+```bash
+cd ~/Works/Darshan-JARVIS-2.0
+bash scripts/start_desktop.sh
+```
+
+The Electron shell opens the holographic JARVIS interface as its own application window rather than a normal browser tab.
