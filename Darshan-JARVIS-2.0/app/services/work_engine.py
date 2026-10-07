@@ -152,7 +152,7 @@ async def create_project(request: str) -> dict:
     write_pdf(folder / "project_report.pdf", plan)
     write_diagram(folder / "final_architecture.svg", plan)
     write_pcb_draft(folder / "pcb_draft.kicad_pcb", plan)
-    (folder / "BOM.csv").write_text("Reference,Component,Value,Quantity\n" + "\n".join(f"J{i+1},{x.get(\"name\",\"\")},{x.get(\"value_or_part\",\"\")},{x.get(\"qty\",1)}" for i,x in enumerate(plan.get("components",[]))), encoding="utf-8")\n    (folder / "project_plan.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8")
+    bom_rows = []\n    for i, component in enumerate(plan.get("components", [])):\n        name = str(component.get("name", ""))\n        value = str(component.get("value_or_part", ""))\n        qty = component.get("qty", 1)\n        bom_rows.append(f"J{i+1},{name},{value},{qty}")\n    (folder / "BOM.csv").write_text("Reference,Component,Value,Quantity\\n" + "\\n".join(bom_rows), encoding="utf-8")\n    (folder / "project_plan.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8")
     (folder / "PCB_README.md").write_text(
         "# PCB draft\n\nAutomatically generated engineering draft. "
         "Verify footprints, pin mapping, ERC/DRC, power integrity and manufacturing outputs before fabrication.\n",
