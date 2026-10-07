@@ -1,22 +1,67 @@
 import json
+import os
+import asyncio
 import httpx
 from .config import AI_PROVIDER, OLLAMA_BASE_URL, OLLAMA_MODEL, OPENAI_API_KEY, OPENAI_MODEL
 
+# Protect the desktop from multiple simultaneous local-model generations.
+# One Ollama generation at a time is deliberate: concurrent generations can
+# exhaust RAM/VRAM and make Linux appear frozen.
+_ollama_lock = asyncio.Semaphore(1)
+
+_HEAVY_MARKERS = ("9b", "14b", "27b", "32b", "34b", "70b", "72b")
+
+def _ollama_model():
+    configured = os.getenv("OLLAMA_MODEL", OLLAMA_MODEL).strip()
+    safe = os.getenv("OLLAMA_SAFE_MODEL", "qwen3.5:4b").strip()
+    allow_heavy = os.getenv("JARVIS_ALLOW_HEAVY_MODEL", "false").strip().lower() in {"1", "true", "yes", "on"}
+    if not allow_heavy and any(marker in configured.lower() for marker in _HEAVY_MARKERS):
+        return safe
+    return configured
+
+async def _ollama_chat(messages, temperature=0.2):
+    model = _ollama_model()
+    timeout = httpx.Timeout(connect=5.0, read=75.0, write=10.0, pool=10.0)
+
+    async with _ollama_lock:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            try:
+                r = await client.post(
+                    f"{OLLAMA_BASE_URL}/api/chat",
+                    json={
+                        "model": model,
+                        "messages": messages,
+                        "stream": False,
+                        "options": {
+                            "temperature": temperature,
+                            # Keep context/generation bounded so a local model
+                            # cannot consume the machine's memory indefinitely.
+                            "num_ctx": int(os.getenv("OLLAMA_NUM_CTX", "2048")),
+                            "num_predict": int(os.getenv("OLLAMA_NUM_PREDICT", "512")),
+                        },
+                    },
+                )
+                r.raise_for_status()
+                data = r.json()
+                return data["message"]["content"]
+            except httpx.TimeoutException as exc:
+                raise RuntimeError(
+                    "Local AI timed out. JARVIS stopped the request to protect system resources. "
+                    f"Model: {model}. Try a smaller Ollama model."
+                ) from exc
+            except httpx.HTTPStatusError as exc:
+                detail = exc.response.text[:500]
+                raise RuntimeError(f"Ollama request failed ({exc.response.status_code}): {detail}") from exc
+
 async def chat(messages, temperature=0.2):
     if AI_PROVIDER == "ollama":
-        async with httpx.AsyncClient(timeout=180) as client:
-            r = await client.post(
-                f"{OLLAMA_BASE_URL}/api/chat",
-                json={"model": OLLAMA_MODEL, "messages": messages, "stream": False,
-                      "options": {"temperature": temperature}},
-            )
-            r.raise_for_status()
-            data = r.json()
-            return data["message"]["content"]
+        return await _ollama_chat(messages, temperature)
+
     if AI_PROVIDER == "openai":
         if not OPENAI_API_KEY:
             raise RuntimeError("OPENAI_API_KEY is not configured")
-        async with httpx.AsyncClient(timeout=180) as client:
+        timeout = httpx.Timeout(connect=10.0, read=75.0, write=10.0, pool=10.0)
+        async with httpx.AsyncClient(timeout=timeout) as client:
             r = await client.post(
                 "https://api.openai.com/v1/chat/completions",
                 headers={"Authorization": f"Bearer {OPENAI_API_KEY}"},
@@ -25,6 +70,7 @@ async def chat(messages, temperature=0.2):
             )
             r.raise_for_status()
             return r.json()["choices"][0]["message"]["content"]
+
     raise RuntimeError(f"Unsupported AI_PROVIDER: {AI_PROVIDER}")
 
 async def answer(question, context):
@@ -34,7 +80,8 @@ If context conflicts with your own knowledge, explain the uncertainty.
 Never claim that model weights were retrained. Knowledge is learned by retrieval
 and verified notes. For consequential actions, ask for confirmation rather than
 performing them."""
-    context_text = json.dumps(context, ensure_ascii=False)[:50000]
+    # Do not send an unnecessarily huge prompt to a local model.
+    context_text = json.dumps(context, ensure_ascii=False)[:12000]
     return await chat([
         {"role": "system", "content": system},
         {"role": "user", "content": f"Relevant stored knowledge and research:\n{context_text}\n\nQuestion:\n{question}"},
@@ -65,10 +112,15 @@ short factual statements."""
 async def embed(text):
     if AI_PROVIDER != "ollama":
         return None
-    async with httpx.AsyncClient(timeout=60) as client:
-        r = await client.post(f"{OLLAMA_BASE_URL}/api/embed",
-                              json={"model": __import__("os").getenv("OLLAMA_EMBED_MODEL", "embeddinggemma"),
-                                    "input": text})
+    timeout = httpx.Timeout(connect=5.0, read=30.0, write=10.0, pool=5.0)
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        r = await client.post(
+            f"{OLLAMA_BASE_URL}/api/embed",
+            json={
+                "model": os.getenv("OLLAMA_EMBED_MODEL", "embeddinggemma"),
+                "input": text,
+            },
+        )
         if r.is_error:
             return None
         data = r.json()
