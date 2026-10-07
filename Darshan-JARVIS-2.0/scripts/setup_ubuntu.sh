@@ -87,14 +87,11 @@ echo "Yosys:      $(command -v yosys || echo missing)"
 ollama --version
 python -c "import qiskit,qiskit_aer; print('Qiskit: OK'); print('Qiskit Aer: OK')"
 
-if ss -ltn 2>/dev/null | grep -q ':8787 '; then
-  echo "Restarting existing JARVIS process..."
-  pkill -f "$ROOT/.venv/bin/uvicorn app.main:app" || true
-  sleep 2
+if ! curl -fsS http://127.0.0.1:8787/health >/dev/null 2>&1; then
+  nohup "$ROOT/.venv/bin/uvicorn" app.main:app --host 127.0.0.1 --port 8787 >"$ROOT/logs/jarvis.log" 2>&1 &
+  echo $! >"$ROOT/logs/jarvis.pid"
+  sleep 3
 fi
-nohup "$ROOT/.venv/bin/uvicorn" app.main:app --host 127.0.0.1 --port 8787 >"$ROOT/logs/jarvis.log" 2>&1 &
-echo $! >"$ROOT/logs/jarvis.pid"
-sleep 3
 
 curl -fsS http://127.0.0.1:8787/health >/dev/null || { echo "JARVIS failed. See logs/jarvis.log"; exit 1; }
 echo
