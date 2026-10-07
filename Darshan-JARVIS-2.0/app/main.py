@@ -200,6 +200,35 @@ async def evaluate_alert(req: AlertRequest, authorization: str | None = Header(d
 class WorkRequest(BaseModel):
     request: str = Field(min_length=5, max_length=12000)
 
+@app.post("/trading/market-snapshot")
+def trading_market_snapshot(req: dict):
+    candles = load_csv(req["csv_path"])
+    return technical_snapshot(candles)
+
+
+@app.post("/trading/walk-forward")
+def trading_walk_forward(req: dict):
+    candles = load_csv(req["csv_path"])
+    return walk_forward_sma(
+        candles,
+        train_size=int(req.get("train_size", 100)),
+        test_size=int(req.get("test_size", 30)),
+        starting_cash=float(req.get("starting_cash", 20.0)),
+    )
+
+
+@app.post("/trading/paper-signal")
+def trading_paper_signal(req: dict):
+    candles = load_csv(req["csv_path"])
+    return paper_signal(candles)
+
+
+@app.post("/trading/fetch-csv")
+def trading_fetch_csv(req: dict):
+    rows = normalize_ohlcv(fetch_csv_url(req["url"]))
+    return {"rows": rows, "count": len(rows), "warning": "Verify provider, symbol, timezone and data quality before use."}
+
+
 @app.post("/trading/backtest")
 def trading_backtest(req: dict):
     candles = load_csv(req["csv_path"])
