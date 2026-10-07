@@ -13,5 +13,6 @@ def remember(title,content,source='user',url=''):
 def search_knowledge(query,limit=6):
     init_knowledge()
     with sqlite3.connect(DB_PATH) as c:
-        rows=c.execute('SELECT title,content,source,url FROM knowledge WHERE knowledge MATCH ? ORDER BY rank LIMIT ?', (query.replace('"',' '),limit)).fetchall()
+        safe_query = '"' + query.replace('"', '""') + '"'
+        rows=c.execute('SELECT title,content,source,url FROM knowledge WHERE knowledge MATCH ? ORDER BY rank LIMIT ?', (safe_query,limit)).fetchall()
     return [{'title':r[0],'content':r[1],'source':r[2],'url':r[3]} for r in rows]
