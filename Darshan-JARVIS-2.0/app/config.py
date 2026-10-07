@@ -35,3 +35,9 @@ def get_web_research_enabled():
 def get_searxng_url():
     load_dotenv(ENV_FILE, override=False)
     return os.getenv('SEARXNG_URL','http://127.0.0.1:8081').rstrip('/')
+
+def get_searxng_urls():
+    primary = get_searxng_url()
+    configured = os.getenv('SEARXNG_FALLBACK_URLS','http://127.0.0.1:8888')
+    urls = [primary] + [x.strip().rstrip('/') for x in configured.split(',') if x.strip()]
+    return list(dict.fromkeys(urls))
