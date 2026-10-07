@@ -6,11 +6,12 @@ through authenticated HTTPS/reverse-proxy controls in production.
 
 from __future__ import annotations
 
+import base64
+import hashlib
+import hmac
 import html
 import os
-import uuid
 from pathlib import Path
-from typing import Optional
 
 import httpx
 from fastapi import HTTPException
@@ -28,6 +29,16 @@ JARVIS_PHONE_GREETING = os.getenv(
     "Hello. This is JARVIS, an AI assistant. I am calling you because you asked me to. How can I help?",
 )
 
+
+
+def verify_twilio_signature(url: str, params: dict[str, str], signature: str) -> bool:
+    """Validate the X-Twilio-Signature header for a webhook request."""
+    if not TWILIO_AUTH_TOKEN or not signature:
+        return False
+    data = url + "".join(f"{k}{params[k]}" for k in sorted(params))
+    digest = hmac.new(TWILIO_AUTH_TOKEN.encode(), data.encode(), hashlib.sha1).digest()
+    expected = base64.b64encode(digest).decode()
+    return hmac.compare_digest(expected, signature)
 
 def configured() -> bool:
     return all(
