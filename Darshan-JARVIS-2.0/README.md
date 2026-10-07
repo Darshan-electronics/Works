@@ -1,61 +1,63 @@
 # DARSHAN JARVIS 2.0
 
-Local-first personal engineering AI for Ubuntu: JARVIS chat, engineering project generation, VLSI/ASIC workflows, PCB drafts and validation, quantum engineering/Qiskit, paper trading, knowledge acquisition, Android events and optional voice/phone integrations.
+A local-first engineering AI dashboard for Ubuntu: Ollama/Qwen, web research, persistent knowledge, VLSI/HDL tools, KiCad project generation, quantum engineering with Qiskit/Aer, paper trading, Android integration foundation, alerts/telephony adapters, and document/project artifact generation.
 
 ## One-command Ubuntu setup
 
-From the repository root:
+Clone the repository, enter the JARVIS directory, and run the installer:
 
-```bash
-bash scripts/setup_ubuntu.sh
-```
+    git clone https://github.com/Darshan-electronics/Works.git
+    cd Works/Darshan-JARVIS-2.0
+    chmod +x scripts/*.sh
+    ./scripts/install.sh
 
-The installer installs Ubuntu dependencies with apt, KiCad/Verilator/Icarus/Yosys, Ollama, the Python environment, Qiskit + Aer, Qwen 3.5 9B and embeddinggemma; creates a strong local .env token; compiles the app; starts JARVIS on 127.0.0.1:8787; and opens the dashboard.
+The installer installs Ubuntu dependencies, Ollama, Qwen 3.5 9B, embeddinggemma, Python dependencies, Qiskit/Aer, Verilator, Icarus Verilog, Yosys and KiCad when available; creates a strong local token; validates the application; starts JARVIS; and opens the dashboard.
 
-Dashboard: `http://127.0.0.1:8787`
-
-If already cloned:
-
-```bash
-cd ~/Works/Darshan-JARVIS-2.0
-git pull origin main
-bash scripts/setup_ubuntu.sh
-```
-
-Do not run `ollama serve` manually if the Ollama service is already running.
+Dashboard: http://127.0.0.1:8787
 
 ## Dashboard
 
-The dashboard is a dark orange holographic JARVIS interface inspired by the supplied visual reference. It includes an animated core/orb, command center, AI/server telemetry, JARVIS chat, Engineering Factory, VLSI/ASIC workbench, Quantum Engineering, Paper Trading, Knowledge/Learning and event/capability panels.
+The dashboard is a dark orange holographic/HUD-style interface inspired by the supplied JARVIS visual: a central glowing engineering core with system telemetry, VLSI/PCB controls, quantum controls, paper-trading telemetry, and authenticated local chat.
 
-The browser stores the bearer token only in session storage. The API remains bound to localhost by default.
+## Current capabilities
 
-## Engineering Factory
+- Local Ollama/Qwen AI and embeddinggemma
+- SQLite FTS5 knowledge and approved memory
+- Optional SearXNG web research
+- VLSI/HDL environment: KiCad, Yosys, Verilator, Icarus Verilog
+- Project Factory: DOCX, PDF, PPTX, SVG architecture, BOM and KiCad PCB draft
+- Quantum Engineering: Qiskit, Aer, Bell simulation and quantum-VLSI planning
+- Paper trading with risk limits and history
+- Android companion foundation
+- Authenticated alerts and phone/voice adapters
 
-A project request can generate a project plan JSON, BOM CSV, architecture SVG, PCB draft, DOCX report, PDF report, PPTX presentation and validation report. PCB output is a draft and must be checked in KiCad before fabrication.
+## Trading safety
 
-## Quantum Engineering
-
-JARVIS includes circuit/algorithm analysis, Bell-state simulation, quantum hardware planning and quantum-VLSI partitioning covering control/readout, ADC/DAC, FPGA/ASIC and cryogenic-electronics planning. Hardware execution is not automatic.
-
-## VLSI / electronics
-
-The Ubuntu installer targets KiCad/kicad-cli, Verilator, Icarus Verilog and Yosys. OpenROAD/OpenLane, Vivado, Quartus, LTspice, STM32CubeIDE and vendor SDKs can be installed separately where licensing/platform requirements apply.
-
-## Trading
-
-JARVIS currently uses paper trading only: a default $20 paper account, risk limits, reward/risk checks, paper positions, history and backtest infrastructure. It does not promise daily profits and does not place real-money orders.
-
-## Remote Android access
-
-Use Tailscale for remote access and keep JARVIS bound to localhost. Prefer a private Tailscale network/Serve endpoint. Never expose Ollama port 11434 directly.
+The default account is a $20 paper account. Live-money execution is not enabled. A daily profit target never forces a trade.
 
 ## Security
 
-JARVIS is not an unrestricted shell agent. Consequential actions require confirmation; financial execution is disabled by default; manual phone calls require confirmation; critical alerts use urgency/cooldowns; cybersecurity is defensive-only; secrets stay in .env and are ignored by Git.
+JARVIS binds to 127.0.0.1 by default. Do not expose Ollama port 11434 or JARVIS port 8787 directly through router port forwarding. For remote access, use an authenticated private overlay such as Tailscale.
 
-## Optional integrations
+Never commit .env, API keys, phone credentials, broker credentials, or private tokens.
 
-GitHub, ElevenLabs voice, Twilio phone alerts, SearXNG web research and OpenAI cloud fallback can be configured later. Local Ollama operation does not require an OpenAI API key.
+## Manual start
 
-The repository is the software stack; you must run the installer on the Ubuntu machine.
+    cd ~/Works/Darshan-JARVIS-2.0
+    source .venv/bin/activate
+    ./scripts/start.sh
+
+Then open http://127.0.0.1:8787.
+
+## Logs
+
+    tail -f logs/jarvis.log
+    tail -f logs/ollama.log
+
+## Important limitation
+
+JARVIS learns through retrieval and source-backed notes; it does not silently retrain model weights or rewrite its own security policy. Engineering outputs, especially PCB drafts, must be validated before fabrication.
+
+## Ubuntu
+
+This repository is configured for Ubuntu, not Rocky Linux. Use apt, Ubuntu paths, and scripts/install.sh.
