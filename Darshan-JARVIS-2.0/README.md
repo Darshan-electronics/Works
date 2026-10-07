@@ -118,3 +118,8 @@ The design is documented in `docs/ANDROID_DEVICE_AGENT.md`. It includes a Colleg
 For calendar integration, Android exposes calendar data through its Calendar provider when the app has the appropriate permission. citeturn0search2turn0search12
 
 For deeper UI automation, an optional Android AccessibilityService can be used only after the user explicitly enables it in Settings; Android requires that explicit user action. citeturn0search1
+
+
+## Ubuntu host
+
+JARVIS is designed to run on Ubuntu. Use `scripts/install_ubuntu.sh` for the base engineering environment and `scripts/check_ubuntu.sh` to verify dependencies. The setup targets Python, Ollama, KiCad/kicad-cli, Verilator, Icarus Verilog and Yosys. KiCad recommends its Ubuntu PPA for current stable releases.\n
