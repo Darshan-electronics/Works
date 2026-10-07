@@ -8,6 +8,7 @@ import androidx.core.app.NotificationCompat
 
 object NotificationHelper {
     private const val CHANNEL = "jarvis_alerts"
+    const val SERVICE_ID = 9001
 
     fun createChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= 26) {
