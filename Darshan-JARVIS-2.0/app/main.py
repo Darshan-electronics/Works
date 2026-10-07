@@ -207,6 +207,14 @@ async def create_artifacts(req: WorkRequest, authorization: str | None = Header(
     audit("artifact_project", "MEDIUM", "created", result["name"])
     return result
 
+@app.post("/artifacts/validate")
+async def validate_artifacts(req: WorkRequest, authorization: str | None = Header(default=None)):
+    auth(authorization)
+    from .services.validation import validate_project
+    result = validate_project(req.request)
+    audit("artifact_validation", "LOW", "completed", req.request[:200])
+    return result
+
 @app.get("/knowledge")
 def knowledge(q: str = "", authorization: str | None = Header(default=None)):
     auth(authorization)
