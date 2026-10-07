@@ -77,7 +77,8 @@ def index():
 def ui_session(request: Request):
     """Issue the local API token to the dashboard only when JARVIS is bound to localhost."""
     host = request.client.host if request.client else ""
-    if host not in {"127.0.0.1", "::1", "localhost"}:
+    normalized_host = host.removeprefix("::ffff:")
+    if normalized_host not in {"127.0.0.1", "::1", "localhost"}:
         raise HTTPException(403, "Dashboard session bootstrap is local-only")
     token = get_access_token()
     if not token:
