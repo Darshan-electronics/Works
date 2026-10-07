@@ -1,23 +1,63 @@
 <!doctype html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Darshan JARVIS</title>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Darshan JARVIS 2.0</title>
 <style>
-body{font-family:system-ui;margin:0;background:#0b1020;color:#eee}main{max-width:900px;margin:auto;padding:20px}
-input,textarea,button{font:inherit;border-radius:10px;border:1px solid #39415c;padding:10px;background:#121a2f;color:#fff}
-input,textarea{width:100%;box-sizing:border-box}button{cursor:pointer;margin-top:8px}
-.card{background:#11182b;border:1px solid #29324d;border-radius:14px;padding:14px;margin:12px 0}
-pre{white-space:pre-wrap;word-wrap:break-word}
-</style></head>
-<body><main>
-<h1>⚡ DARSHAN JARVIS</h1>
-<div class="card"><label>Access token</label><input id="token" type="password" placeholder="Paste your JARVIS token"></div>
-<div class="card"><h3>Chat</h3><textarea id="msg" rows="4" placeholder="Ask JARVIS anything..."></textarea><button onclick="chat()">Ask JARVIS</button><pre id="chatout"></pre></div>
-<div class="card"><h3>Learn & remember</h3><input id="topic" placeholder="e.g. OpenLane 2 architecture"><button onclick="learn()">Research, verify and remember</button><pre id="learnout"></pre></div>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:#070b14;color:#e8eefc}
+header{padding:18px 24px;border-bottom:1px solid #202a40;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#090e19ee;backdrop-filter:blur(12px);z-index:2}
+h1{font-size:20px;margin:0}.status{display:flex;gap:8px;align-items:center;font-size:13px}.dot{width:9px;height:9px;border-radius:50%;background:#777}.ok{background:#36d399}
+main{max-width:1250px;margin:auto;padding:22px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.card{background:#0e1524;border:1px solid #202a40;border-radius:16px;padding:16px}.span4{grid-column:span 4}.span6{grid-column:span 6}.span8{grid-column:span 8}.span12{grid-column:span 12}
+label{font-size:12px;color:#8fa0bf;display:block;margin-bottom:7px}input,textarea,button{font:inherit;border-radius:10px;border:1px solid #2a3753;padding:10px;background:#0a1120;color:#fff}input,textarea{width:100%}button{cursor:pointer;background:#16243d}button:hover{background:#1b2f50}.row{display:flex;gap:8px}.row>*{flex:1}pre{white-space:pre-wrap;word-break:break-word;background:#080d17;padding:12px;border-radius:10px;max-height:300px;overflow:auto}.metric{font-size:25px;font-weight:700}.muted{color:#8fa0bf;font-size:12px}.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}.tabs button.active{border-color:#6ea8fe;background:#17294a}
+@media(max-width:850px){.span4,.span6,.span8{grid-column:span 12}}
+</style>
+</head>
+<body>
+<header><h1>⚡ DARSHAN JARVIS 2.0</h1><div class="status"><span id="dot" class="dot"></span><span id="server">Offline</span></div></header>
+<main>
+<div class="card span12"><label>JARVIS Access Token</label><div class="row"><input id="token" type="password" placeholder="Paste your local JARVIS token"><button onclick="saveToken()">Save</button></div><div class="muted">Stored only in this browser session.</div></div>
+<div class="tabs"><button class="active" onclick="show('overview',this)">Overview</button><button onclick="show('engineering',this)">Engineering</button><button onclick="show('quantum',this)">Quantum</button><button onclick="show('trading',this)">Trading</button></div>
+
+<section id="overview" class="grid">
+<div class="card span4"><div class="muted">AI Backend</div><div id="ai" class="metric">—</div></div>
+<div class="card span4"><div class="muted">Web Research</div><div id="web" class="metric">—</div></div>
+<div class="card span4"><div class="muted">Quantum Backend</div><div id="quantum" class="metric">—</div></div>
+<div class="card span8"><h3>Chat with JARVIS</h3><textarea id="msg" rows="4" placeholder="Ask JARVIS anything..."></textarea><button onclick="chat()">Ask JARVIS</button><pre id="chatout"></pre></div>
+<div class="card span4"><h3>Learn</h3><input id="topic" placeholder="Research a topic"><button onclick="learn()">Research & Remember</button><pre id="learnout"></pre></div>
+</section>
+
+<section id="engineering" class="grid" style="display:none">
+<div class="card span8"><h3>Project Factory</h3><textarea id="project" rows="6" placeholder="Describe the project you want JARVIS to design..."></textarea><button onclick="createProject()">Create Project Package</button><pre id="projectout"></pre></div>
+<div class="card span4"><h3>Validation</h3><input id="folder" placeholder="Project folder path"><button onclick="validateProject()">Validate PCB / project</button><pre id="validateout"></pre></div>
+</section>
+
+<section id="quantum" class="grid" style="display:none">
+<div class="card span6"><h3>Quantum Analysis</h3><textarea id="qrequest" rows="5" placeholder="e.g. Design a quantum VLSI accelerator architecture"></textarea><button onclick="qAnalyze()">Analyze</button><pre id="qout"></pre></div>
+<div class="card span6"><h3>Bell-State Simulator</h3><button onclick="bell()">Run Qiskit Bell test</button><pre id="bellout"></pre></div>
+</section>
+
+<section id="trading" class="grid" style="display:none">
+<div class="card span4"><div class="muted">Paper Equity</div><div id="equity" class="metric">$—</div></div>
+<div class="card span4"><div class="muted">Open Positions</div><div id="positions" class="metric">—</div></div>
+<div class="card span4"><div class="muted">Daily Risk Limit</div><div id="risk" class="metric">—</div></div>
+<div class="card span12"><h3>Paper Trading Status</h3><button onclick="tradingStatus()">Refresh</button><pre id="tradeout"></pre><div class="muted">This dashboard is paper-trading only. It does not place real-money orders.</div></div>
+</section>
+</main>
 <script>
+const $=id=>document.getElementById(id);
 token.value=sessionStorage.getItem("jarvis_token")||"";
-token.onchange=()=>sessionStorage.setItem("jarvis_token",token.value);
-const headers=()=>({"Authorization":"Bearer "+token.value,"Content-Type":"application/json"});
-async function chat(){chatout.textContent="Thinking...";try{let r=await fetch("/chat",{method:"POST",headers:headers(),body:JSON.stringify({message:msg.value})});let d=await r.json();chatout.textContent=d.answer||JSON.stringify(d,null,2)}catch(e){chatout.textContent=e}}
-async function learn(){learnout.textContent="Researching and curating...";try{let r=await fetch("/learn",{method:"POST",headers:headers(),body:JSON.stringify({topic:topic.value,save:true})});let d=await r.json();learnout.textContent=JSON.stringify(d,null,2)}catch(e){learnout.textContent=e}}
-</script></main></body></html>
+function saveToken(){sessionStorage.setItem("jarvis_token",token.value);health()}
+function headers(){return {"Authorization":"Bearer "+token.value,"Content-Type":"application/json"}}
+async function api(url,opt={}){let r=await fetch(url,opt);let d=await r.json().catch(()=>({detail:r.statusText}));if(!r.ok)throw new Error(d.detail||JSON.stringify(d));return d}
+async function health(){try{let d=await api("/health");$("dot").className="dot ok";$("server").textContent="Online";$("ai").textContent=d.ai;$("web").textContent=d.web_research?"Enabled":"Disabled";let q=await api("/quantum/status");$("quantum").textContent=q.available?"Ready":"Unavailable";tradingStatus()}catch(e){$("dot").className="dot";$("server").textContent="Offline";}}
+async function chat(){ $("chatout").textContent="Thinking...";try{let d=await api("/chat",{method:"POST",headers:headers(),body:JSON.stringify({message:$("msg").value})});$("chatout").textContent=d.answer}catch(e){$("chatout").textContent=e.message}}
+async function learn(){$("learnout").textContent="Researching...";try{$("learnout").textContent=JSON.stringify(await api("/learn",{method:"POST",headers:headers(),body:JSON.stringify({topic:$("topic").value,save:true})}),null,2)}catch(e){$("learnout").textContent=e.message}}
+async function createProject(){$("projectout").textContent="Generating artifacts...";try{$("projectout").textContent=JSON.stringify(await api("/artifacts/project",{method:"POST",headers:headers(),body:JSON.stringify({request:$("project").value})}),null,2)}catch(e){$("projectout").textContent=e.message}}
+async function validateProject(){$("validateout").textContent="Validating...";try{$("validateout").textContent=JSON.stringify(await api("/artifacts/validate",{method:"POST",headers:headers(),body:JSON.stringify({request:$("folder").value})}),null,2)}catch(e){$("validateout").textContent=e.message}}
+async function qAnalyze(){$("qout").textContent="Analyzing...";try{$("qout").textContent=JSON.stringify(await api("/quantum/analyze",{method:"POST",headers:headers(),body:JSON.stringify({request:$("qrequest").value})}),null,2)}catch(e){$("qout").textContent=e.message}}
+async function bell(){$("bellout").textContent="Running...";try{$("bellout").textContent=JSON.stringify(await api("/quantum/bell",{method:"POST"}),null,2)}catch(e){$("bellout").textContent=e.message}}
+async function tradingStatus(){try{let d=await api("/trading/status");$("equity").textContent="$"+Number(d.equity||0).toFixed(2);$("positions").textContent=(d.open_positions||[]).length;$("risk").textContent=(d.max_daily_loss_pct||0)+"%";$("tradeout").textContent=JSON.stringify(d,null,2)}catch(e){$("tradeout").textContent=e.message}}
+function show(id,b){["overview","engineering","quantum","trading"].forEach(x=>$(x).style.display=x===id?"grid":"none");document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active")}
+health();setInterval(health,15000);
+</script>
+</body></html>
