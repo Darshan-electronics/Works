@@ -1,10 +1,15 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv()
 ROOT=Path(__file__).resolve().parent.parent
+ENV_FILE=ROOT/'.env'
+load_dotenv(ENV_FILE, override=False)
 DATA=ROOT/'data'; DATA.mkdir(exist_ok=True)
 ACCESS_TOKEN=os.getenv('JARVIS_ACCESS_TOKEN','')
+
+def get_access_token():
+    load_dotenv(ENV_FILE, override=False)
+    return os.getenv('JARVIS_ACCESS_TOKEN','')
 AI_PROVIDER=os.getenv('AI_PROVIDER','ollama').lower()
 OPENAI_API_KEY=os.getenv('OPENAI_API_KEY','')
 OPENAI_MODEL=os.getenv('OPENAI_MODEL','gpt-5.6')
@@ -22,3 +27,11 @@ CONFIRM_HIGH=os.getenv('REQUIRE_CONFIRMATION_HIGH','true').lower()=='true'
 CONFIRM_CRITICAL=os.getenv('REQUIRE_CONFIRMATION_CRITICAL','true').lower()=='true'
 WEB_RESEARCH_ENABLED=os.getenv('WEB_RESEARCH_ENABLED','true').lower()=='true'
 SEARXNG_URL=os.getenv('SEARXNG_URL','http://127.0.0.1:8081').rstrip('/')
+
+def get_web_research_enabled():
+    load_dotenv(ENV_FILE, override=False)
+    return os.getenv('WEB_RESEARCH_ENABLED','true').strip().lower() in {'1','true','yes','on'}
+
+def get_searxng_url():
+    load_dotenv(ENV_FILE, override=False)
+    return os.getenv('SEARXNG_URL','http://127.0.0.1:8081').rstrip('/')
