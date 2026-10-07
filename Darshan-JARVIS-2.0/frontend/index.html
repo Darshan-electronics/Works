@@ -39,7 +39,7 @@ input,textarea{width:100%;background:#050505;color:#ffe8d2;border:1px solid #4b2
 </aside>
 </div>
 
-<div class="tabs"><button class="active" onclick="show('command',this)">COMMAND</button><button onclick="show('engineering',this)">ENGINEERING</button><button onclick="show('vlsi',this)">VLSI / ASIC</button><button onclick="show('quantum',this)">QUANTUM</button><button onclick="show('trading',this)">PAPER TRADING</button><button onclick="show('learning',this)">LEARNING</button></div>
+<div class="tabs"><button class="active" onclick="show('command',this)">COMMAND</button><button onclick="show('engineering',this)">ENGINEERING</button><button onclick="show('vlsi',this)">VLSI / ASIC</button><button onclick="show('quantum',this)">QUANTUM</button><button onclick="show('trading',this)">PAPER TRADING</button><button onclick="show('learning',this)">LEARNING</button><button onclick="show('selfmod',this)">SELF-MODIFICATION</button></div>
 
 <section id="command" class="section active"><div class="cards">
 <div class="card c8"><div class="muted">JARVIS COMMAND CONSOLE</div><h2>What do you want me to do?</h2><textarea id="msg" rows="5" placeholder="Design a VLSI accelerator... Create a PCB... Explain a quantum architecture..."></textarea><div class="row"><button class="btn" onclick="chat()">EXECUTE COMMAND</button><button class="btn" onclick="toggleVoice(this)">🔊 VOICE ON</button><button class="btn" onclick="stopSpeaking()">STOP VOICE</button></div><pre id="chatout">Awaiting command...</pre></div>
@@ -72,7 +72,12 @@ Ollama / Qwen 3.5 9B</pre></div>
 </div></section>
 
 <section id="learning" class="section"><div class="cards"><div class="card c8"><div class="muted">KNOWLEDGE ACQUISITION</div><input id="topic" placeholder="Research a topic"><button class="btn" onclick="learn()">RESEARCH & REMEMBER</button><pre id="learnout"></pre></div><div class="card c4"><div class="muted">LOCAL-FIRST</div><p class="mini">Knowledge is stored with source references. Model weights are not silently retrained.</p></div></div></section>
-</main>
+
+
+<section id="selfmod" class="section"><div class="cards">
+<div class="card c8"><div class="muted">JARVIS SELF-MODIFICATION CONTROL</div><h2>Every code change requires your approval</h2><p class="mini">JARVIS may propose improvements, including tiny changes, but it cannot modify its code until you explicitly approve the exact proposal.</p><button class="btn" onclick="refreshProposals()">CHECK PENDING CHANGES</button><div id="proposals"></div></div>
+<div class="card c4"><div class="muted">SAFETY LOCK</div><div class="metric">USER APPROVAL</div><p class="mini">No permanent "auto-approve" mode. Each proposal is individually approved or rejected.</p></div>
+</div></section></main>
 <script>
 const $=id=>document.getElementById(id);
 let token=sessionStorage.getItem("jarvis_token")||"";
@@ -125,6 +130,23 @@ async function qAnalyze(){$("qout").textContent="ANALYZING...";try{$("qout").tex
 async function bell(){$("bellout").textContent="SIMULATING...";try{$("bellout").textContent=JSON.stringify(await api("/quantum/bell",{method:"POST"}),null,2)}catch(e){$("bellout").textContent=e.message}}
 async function tradingStatus(){try{let d=await api("/trading/status");const a=d.account||{},r=d.risk||{},p=d.positions||[];$("equity").textContent="$"+Number(a.equity||0).toFixed(2);$("equity0").textContent="$"+Number(a.equity||0).toFixed(2);$("positions").textContent=p.length;$("risk").textContent=Number(r.max_daily_loss_pct||0)+"%";$("tradeout").textContent=JSON.stringify(d,null,2)}catch(e){$("tradeout").textContent=e.message}}
 function show(id,b){document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active")}
-connect();setInterval(health,15000);
+
+async function refreshProposals(){
+  const box=$("proposals"); box.innerHTML="Checking...";
+  try{
+    const d=await api("/code/pending");
+    if(!d.proposals.length){box.innerHTML='<p class="mini">No pending code changes.</p>';return;}
+    box.innerHTML=d.proposals.map(p=>
+      '<div class="panel" style="margin-top:10px"><b>'+escapeHtml(p.path)+'</b><p class="mini">'+escapeHtml(p.reason||"No reason supplied")+'</p><p class="mini">Proposal: '+p.id+'</p><div class="row"><button class="btn" onclick="decideCode(\''+p.id+'\',true)">APPROVE THIS CHANGE</button><button class="btn" onclick="decideCode(\''+p.id+'\',false)">REJECT</button></div></div>'
+    ).join("");
+  }catch(e){box.textContent=e.message}
+}
+async function decideCode(id,approved){
+  if(approved && !confirm("Approve this exact JARVIS code change? This will modify the file.")) return;
+  try{await api("/code/proposals/"+encodeURIComponent(id)+"/decision",{method:"POST",headers:headers(),body:JSON.stringify({approved})}); await refreshProposals();}
+  catch(e){alert(e.message)}
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+\nconnect();setInterval(health,15000);
 </script>
 </body></html>
