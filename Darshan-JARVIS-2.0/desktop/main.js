@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell } = require("electron");
+const { app, BrowserWindow, shell, session } = require("electron");
 const path = require("path");
 const http = require("http");
 
@@ -50,6 +50,11 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
+  // Allow microphone access for the local JARVIS UI.
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    callback(permission === "media" || permission === "microphone");
+  });
+
   try {
     await waitForServer();
     createWindow();
