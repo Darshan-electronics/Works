@@ -25,6 +25,7 @@ async def run_call_bridge(
     twilio_ws,
     ai_answer: Callable[[str, dict], Awaitable[str]],
     call_sid: str = "",
+    opening_message: str = "",
 ) -> None:
     if not ELEVEN_KEY or not ELEVEN_VOICE_ID:
         await twilio_ws.close(code=1011, reason="ElevenLabs voice is not configured")
@@ -46,7 +47,7 @@ async def run_call_bridge(
             "voices": [ELEVEN_VOICE_ID],
             "xi_api_key": ELEVEN_KEY,
             "language_code": "en",
-        }))
+        }))\n        if opening_message:\n            await tts.send(json.dumps({\n                "inputs": [{"text": opening_message, "voice_id": ELEVEN_VOICE_ID, "new_turn": True}],\n                "flush": True,\n            }))
 
         stream_sid = None
         response_lock = asyncio.Lock()
