@@ -10,6 +10,7 @@ from .memory import add_memory, search_memories, audit
 from .services.web_research import search_web
 
 app = FastAPI(title="Darshan JARVIS 2.0")
+mobile_clients: set[WebSocket] = set()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -78,6 +79,24 @@ async def learn(req: LearnRequest, authorization: str | None = Header(default=No
 class PhoneCallRequest(BaseModel):
     to_number: str = Field(min_length=8, max_length=32)
     confirmed: bool = False
+
+
+@app.websocket("/mobile/events")
+async def mobile_events(websocket: WebSocket):
+    auth_header = websocket.headers.get("authorization")
+    if not ACCESS_TOKEN or auth_header != "Bearer " + ACCESS_TOKEN:
+        await websocket.close(code=1008, reason="Unauthorized")
+        return
+    await websocket.accept()
+    mobile_clients.add(websocket)
+    try:
+        await websocket.send_json({"type": "connected", "service": "jarvis", "message": "JARVIS mobile event channel connected"})
+        while True:
+            await websocket.receive_text()
+    except Exception:
+        pass
+    finally:
+        mobile_clients.discard(websocket)
 
 @app.post("/phone/call")
 async def phone_call(req: PhoneCallRequest, authorization: str | None = Header(default=None)):
@@ -158,6 +177,15 @@ async def evaluate_alert(req: AlertRequest, authorization: str | None = Header(d
             raise HTTPException(503, "JARVIS_PHONE_NUMBER is not configured")
         call_result = await create_call(target, f"Important JARVIS alert: {req.message}")
 
+    event = {"type": "alert", "event_key": req.event_key, "level": decision.level, "message": req.message, "call": decision.call}
+    stale = []
+    for client in mobile_clients:
+        try:
+            await client.send_json(event)
+        except Exception:
+            stale.append(client)
+    for client in stale:
+        mobile_clients.discard(client)
     audit("alert", decision.level, decision.reason, req.event_key)
     return {
         "level": decision.level,
