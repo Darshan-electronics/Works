@@ -1,144 +1,100 @@
 # DARSHAN JARVIS 2.0
 
-A local-first personal engineering AI for **Ubuntu** with a holographic orange JARVIS dashboard.
+Local-first personal engineering AI for Ubuntu: JARVIS chat, VLSI/EDA workflows, quantum engineering, project/report/PPT generation, PCB drafts and validation, research/memory, and paper trading.
 
-## One-command install
+## One-command Ubuntu setup
 
-On a fresh Ubuntu machine:
+    git clone https://github.com/Darshan-electronics/Works.git
+    cd Works/Darshan-JARVIS-2.0
+    bash scripts/install_ubuntu.sh
 
-```bash
-git clone https://github.com/Darshan-electronics/Works.git ~/Works
-cd ~/Works/Darshan-JARVIS-2.0
-bash scripts/setup_ubuntu.sh
-```
+The installer automatically installs Ubuntu dependencies, creates the Python environment, installs engineering and quantum dependencies, installs KiCad/Verilator/Icarus/Yosys when available, installs and starts Ollama, downloads Qwen 3.5 9B and embeddinggemma, creates a secure local token, installs a user systemd service, starts JARVIS on 127.0.0.1:8787, and opens the dashboard.
 
-The installer:
+Dashboard: http://127.0.0.1:8787
 
-- installs the Ubuntu/Python build dependencies
-- installs/updates KiCad CLI, Verilator, Icarus Verilog and Yosys where available
-- installs Ollama
-- creates a Python virtual environment
-- installs JARVIS Python dependencies
-- installs Qiskit + Qiskit Aer
-- pulls Qwen 3.5 9B and embeddinggemma
-- creates a local `.env` with a random bearer token if one is missing
-- validates the Python source
-- starts JARVIS on `127.0.0.1:8787`
-- opens the dashboard automatically
+## Updating an existing installation
 
-After installation, open:
+    cd ~/Works/Darshan-JARVIS-2.0
+    git pull origin main
+    bash scripts/install_ubuntu.sh
 
-```
-http://127.0.0.1:8787
-```
-
-If JARVIS is already running, the installer keeps the existing process and opens the dashboard.
+The installer preserves an existing non-empty .env token.
 
 ## Dashboard
 
-The dashboard is intentionally styled around the supplied reference: black HUD, glowing orange/gold central AI core, scan line, technical grid, telemetry panels and command tabs.
+The dashboard is an orange/black holographic HUD inspired by the supplied JARVIS visual: central animated neural core, system matrix, mission console, engineering factory, quantum console, knowledge acquisition and paper-trading panels.
 
-It provides:
+When accessed locally, the dashboard obtains the API token through the localhost-only /ui/session endpoint. For remote access, keep the bearer token protected and use a private HTTPS/Tailscale path.
 
-- Command Center / JARVIS chat
-- Engineering Project Factory
-- VLSI / ASIC workbench
-- Quantum Engineering
-- Qiskit Bell-state simulation
-- Paper Trading telemetry
-- Research / Knowledge acquisition
-- server and AI status
+## Current capabilities
 
-The browser stores the bearer token in session storage only.
+### AI
+- Ollama + Qwen 3.5 9B
+- local retrieval memory and knowledge
+- optional web research through SearXNG
+- optional cloud model fallback
 
-## Engineering Factory
+### Engineering
+- project planning
+- DOCX, PDF and PPTX generation
+- architecture diagrams
+- BOM generation
+- KiCad PCB draft generation
+- KiCad validation hooks
+- VLSI/RTL tooling integration points
 
-JARVIS can generate an engineering project package containing:
-
-- project plan JSON
-- BOM CSV
-- architecture SVG
-- PCB draft
-- DOCX report
-- PDF report
-- PPTX presentation
-- validation report
-
-PCB output is a **draft**. Verify footprints, pin mapping, ERC/DRC, power integrity and manufacturing files before fabrication.
-
-## VLSI / ASIC
-
-The Ubuntu stack is prepared for:
-
-- SystemVerilog / Verilog
-- Icarus Verilog
-- Verilator
-- Yosys
-- KiCad
-- OpenROAD/OpenLane planning
-
-Vendor tools such as Vivado, Quartus and STM32CubeIDE may require separate downloads/licensing.
-
-## Quantum Engineering
-
-JARVIS includes:
-
-- Qiskit
-- Qiskit Aer
-- quantum algorithm analysis
+### Quantum engineering
+- Qiskit circuit analysis
+- Qiskit Aer simulation
 - Bell-state simulation
-- quantum-VLSI planning
-- control/readout architecture planning
-- FPGA/ASIC partitioning concepts
+- quantum architecture planning
+- quantum-VLSI/control/readout/cryogenic electronics planning
 
-Hardware execution still requires the appropriate physical quantum platform.
+### Trading
+- research and paper trading only
+- OHLCV backtesting
+- strategy comparison
+- paper positions and history
+- risk limits
+- no automatic live-money execution
 
-## Trading
-
-The current trading system is **paper trading only**. It includes a default $20 paper account, risk controls, backtesting infrastructure, paper positions and history.
-
-It does **not** guarantee profits and does not place real-money orders.
+### Android
+The Android companion can connect to the JARVIS API for notifications, calendar/device intents and future device-agent capabilities. Android still requires explicit permissions for protected capabilities.
 
 ## Security
 
-Default network binding is localhost:
+JARVIS is deliberately not an unrestricted public shell.
 
-```
-127.0.0.1:8787
-```
+- API binds to localhost by default.
+- Ollama port 11434 should never be publicly exposed.
+- High-risk actions require confirmation.
+- Financial execution remains paper-only.
+- Phone and notification features require explicit configuration.
+- Never commit .env or API keys.
 
-Do not expose port 8787 or Ollama port 11434 directly to the public Internet. For remote Android access, use a private authenticated tunnel such as Tailscale and keep the JARVIS bearer token secret.
+## Service commands
 
-Consequential actions require confirmation. Phone/financial integrations remain optional.
+    systemctl --user status jarvis.service
+    systemctl --user restart jarvis.service
+    journalctl --user -u jarvis.service -n 100 --no-pager
 
-## Useful commands
+## Manual start
 
-Start manually:
+    cd ~/Works/Darshan-JARVIS-2.0
+    source .venv/bin/activate
+    ./scripts/start.sh
 
-```bash
-cd ~/Works/Darshan-JARVIS-2.0
-source .venv/bin/activate
-./scripts/start.sh
-```
+## Project API
 
-View logs:
+- POST /chat — JARVIS conversation
+- POST /learn — research and source-backed knowledge
+- POST /artifacts/project — project package generation
+- POST /artifacts/validate — project/PCB validation
+- GET /quantum/status — quantum backend status
+- POST /quantum/analyze — quantum engineering analysis
+- POST /quantum/bell — Bell-state simulation
+- GET /trading/status — paper account status
 
-```bash
-tail -f logs/jarvis.log
-```
+## Important
 
-Health check:
-
-```bash
-curl http://127.0.0.1:8787/health
-```
-
-Stop the background process created by the installer:
-
-```bash
-kill "$(cat logs/jarvis.pid)"
-```
-
-## Repository
-
-`Darshan-JARVIS-2.0/` is the complete Ubuntu host application. The Android companion is under `android/`.
+The project grows through explicit modules and source-backed knowledge. It does not silently rewrite its own code, security policy or financial permissions.
