@@ -135,3 +135,7 @@ For deeper UI automation, an optional Android AccessibilityService can be used o
 ## Ubuntu host
 
 JARVIS is designed to run on Ubuntu. Use `scripts/install_ubuntu.sh` for the base engineering environment and `scripts/check_ubuntu.sh` to verify dependencies. The setup targets Python, Ollama, KiCad/kicad-cli, Verilator, Icarus Verilog and Yosys. KiCad recommends its Ubuntu PPA for current stable releases.\n
+
+## Quantum engineering
+
+JARVIS includes a quantum-engineering layer for quantum circuit/algorithm planning, local simulation when Qiskit/Qiskit Aer is installed, quantum-system analysis, and quantum-VLSI planning that connects qubit/control/readout requirements with ADC/DAC, RF/microwave, FPGA/ASIC, cryogenic-electronics and verification workflows. Quantum SDKs are optional and remain disabled unless installed. Hardware execution should require explicit configuration and confirmation.\n
