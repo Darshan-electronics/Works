@@ -200,6 +200,24 @@ async def evaluate_alert(req: AlertRequest, authorization: str | None = Header(d
 class WorkRequest(BaseModel):
     request: str = Field(min_length=5, max_length=12000)
 
+@app.post("/trading/backtest")
+def trading_backtest(req: dict):
+    candles = load_csv(req["csv_path"])
+    return backtest_sma_cross(
+        candles,
+        fast=int(req.get("fast", 10)),
+        slow=int(req.get("slow", 30)),
+        starting_cash=float(req.get("starting_cash", 20.0)),
+        fee_pct=float(req.get("fee_pct", 0.1)),
+    )
+
+
+@app.post("/trading/compare")
+def trading_compare(req: dict):
+    candles = load_csv(req["csv_path"])
+    return compare_strategies(candles, starting_cash=float(req.get("starting_cash", 20.0)))
+
+
 @app.get("/trading/status")
 def trading_status():
     return TradingEngine().status()
