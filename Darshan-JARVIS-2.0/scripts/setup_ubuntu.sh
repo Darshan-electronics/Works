@@ -61,6 +61,18 @@ PY
 
 ollama pull qwen3.5:9b
 ollama pull embeddinggemma || true
+
+# Only advertise web research when a local SearXNG endpoint is reachable.
+if curl -fsS --max-time 2 http://127.0.0.1:8081 >/dev/null 2>&1; then
+  sed -i 's/^WEB_RESEARCH_ENABLED=.*/WEB_RESEARCH_ENABLED=true/' .env
+else
+  if grep -q '^WEB_RESEARCH_ENABLED=' .env; then
+    sed -i 's/^WEB_RESEARCH_ENABLED=.*/WEB_RESEARCH_ENABLED=false/' .env
+  else
+    printf '\nWEB_RESEARCH_ENABLED=false\n' >> .env
+  fi
+fi
+
 python -m compileall -q app
 python - <<'PY'
 from dotenv import dotenv_values
