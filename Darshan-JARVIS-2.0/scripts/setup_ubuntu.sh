@@ -87,6 +87,15 @@ echo "Yosys:      $(command -v yosys || echo missing)"
 ollama --version
 python -c "import qiskit,qiskit_aer; print('Qiskit: OK'); print('Qiskit Aer: OK')"
 
+# Optional per-user service: keep JARVIS alive across terminal closes/reboots.
+if command -v systemctl >/dev/null 2>&1 && systemctl --user status >/dev/null 2>&1; then
+  mkdir -p "$HOME/.config/systemd/user"
+  sed "s#%h/Works/Darshan-JARVIS-2.0#$ROOT#g" "$ROOT/systemd/jarvis.service" > "$HOME/.config/systemd/user/jarvis.service"
+  systemctl --user daemon-reload || true
+  systemctl --user enable jarvis.service || true
+  systemctl --user start jarvis.service || true
+fi
+
 if ! curl -fsS http://127.0.0.1:8787/health >/dev/null 2>&1; then
   nohup "$ROOT/.venv/bin/uvicorn" app.main:app --host 127.0.0.1 --port 8787 >"$ROOT/logs/jarvis.log" 2>&1 &
   echo $! >"$ROOT/logs/jarvis.pid"
