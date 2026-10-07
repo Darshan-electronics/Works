@@ -123,3 +123,140 @@ def compare_strategies(candles: list[Candle], starting_cash: float = 20.0) -> li
         for a, b in configs
     ]
     return sorted(results, key=lambda x: (x["total_return_pct"], -x["max_drawdown_pct"]), reverse=True)
+
+
+
+def ema(values: list[float], period: int) -> list[float | None]:
+    if period <= 0:
+        raise ValueError("period must be positive")
+    out: list[float | None] = [None] * len(values)
+    if len(values) < period:
+        return out
+    seed = sum(values[:period]) / period
+    out[period - 1] = seed
+    alpha = 2.0 / (period + 1)
+    prev = seed
+    for i in range(period, len(values)):
+        prev = alpha * values[i] + (1 - alpha) * prev
+        out[i] = prev
+    return out
+
+
+def rsi(values: list[float], period: int = 14) -> list[float | None]:
+    if period <= 0:
+        raise ValueError("period must be positive")
+    out: list[float | None] = [None] * len(values)
+    if len(values) <= period:
+        return out
+    gains = [max(values[i] - values[i-1], 0.0) for i in range(1, len(values))]
+    losses = [max(values[i-1] - values[i], 0.0) for i in range(1, len(values))]
+    avg_gain = sum(gains[:period]) / period
+    avg_loss = sum(losses[:period]) / period
+    def value(g: float, l: float) -> float:
+        if l == 0:
+            return 100.0
+        rs = g / l
+        return 100.0 - (100.0 / (1.0 + rs))
+    out[period] = value(avg_gain, avg_loss)
+    for i in range(period, len(gains)):
+        avg_gain = ((avg_gain * (period - 1)) + gains[i]) / period
+        avg_loss = ((avg_loss * (period - 1)) + losses[i]) / period
+        out[i + 1] = value(avg_gain, avg_loss)
+    return out
+
+
+def atr(candles: list[Candle], period: int = 14) -> list[float | None]:
+    if len(candles) <= period:
+        return [None] * len(candles)
+    trs = [0.0]
+    for i in range(1, len(candles)):
+        c, prev = candles[i], candles[i-1]
+        trs.append(max(c.high-c.low, abs(c.high-prev.close), abs(c.low-prev.close)))
+    out: list[float | None] = [None] * len(candles)
+    prev_atr = sum(trs[1:period+1]) / period
+    out[period] = prev_atr
+    for i in range(period + 1, len(candles)):
+        prev_atr = ((prev_atr * (period - 1)) + trs[i]) / period
+        out[i] = prev_atr
+    return out
+
+
+def technical_snapshot(candles: list[Candle]) -> dict[str, Any]:
+    closes = [c.close for c in candles]
+    fast = sma(closes, 10)[-1]
+    slow = sma(closes, 30)[-1]
+    e20 = ema(closes, 20)[-1]
+    r14 = rsi(closes, 14)[-1]
+    a14 = atr(candles, 14)[-1]
+    return {
+        "last_timestamp": candles[-1].timestamp,
+        "close": closes[-1],
+        "sma10": fast,
+        "sma30": slow,
+        "ema20": e20,
+        "rsi14": r14,
+        "atr14": a14,
+        "signal": (
+            "bullish" if fast is not None and slow is not None and fast > slow and (r14 is None or r14 < 70)
+            else "bearish" if fast is not None and slow is not None and fast < slow
+            else "neutral"
+        ),
+    }
+
+
+def walk_forward_sma(candles: list[Candle], train_size: int = 100, test_size: int = 30,
+                     starting_cash: float = 20.0) -> dict[str, Any]:
+    if train_size <= 0 or test_size <= 0:
+        raise ValueError("train_size and test_size must be positive")
+    windows = []
+    start = 0
+    while start + train_size + test_size <= len(candles):
+        train = candles[start:start+train_size]
+        test = candles[start+train_size:start+train_size+test_size]
+        candidates = compare_strategies(train, starting_cash=starting_cash)
+        chosen = candidates[0]
+        fast, slow = (int(x) for x in chosen["strategy"].split()[-1].split("/"))
+        forward = backtest_sma_cross(test, fast=fast, slow=slow, starting_cash=starting_cash)
+        windows.append({
+            "train_start": train[0].timestamp,
+            "train_end": train[-1].timestamp,
+            "test_start": test[0].timestamp,
+            "test_end": test[-1].timestamp,
+            "selected_strategy": chosen["strategy"],
+            "forward_result": {
+                "return_pct": forward["total_return_pct"],
+                "max_drawdown_pct": forward["max_drawdown_pct"],
+                "win_rate_pct": forward["win_rate_pct"],
+                "profit_factor": forward["profit_factor"],
+            },
+        })
+        start += test_size
+    if not windows:
+        raise ValueError("Not enough data for walk-forward testing.")
+    returns = [w["forward_result"]["return_pct"] for w in windows]
+    return {
+        "method": "walk_forward",
+        "windows": windows,
+        "average_forward_return_pct": sum(returns) / len(returns),
+        "profitable_windows_pct": sum(r > 0 for r in returns) / len(returns) * 100,
+        "warning": "Walk-forward results are historical/forward-simulation evidence, not a guarantee of future returns.",
+    }
+
+
+def paper_signal(candles: list[Candle]) -> dict[str, Any]:
+    snap = technical_snapshot(candles)
+    price = float(snap["close"])
+    a = snap["atr14"] or max(price * 0.005, 0.01)
+    if snap["signal"] != "bullish":
+        return {"action": "NO_TRADE", "reason": "No bullish confirmation.", "snapshot": snap}
+    stop = price - 1.5 * a
+    target = price + 3.0 * a
+    return {
+        "action": "PAPER_BUY_CANDIDATE",
+        "price": price,
+        "stop": stop,
+        "target": target,
+        "reward_risk": 2.0,
+        "snapshot": snap,
+        "warning": "Signal is for paper trading only.",
+    }
