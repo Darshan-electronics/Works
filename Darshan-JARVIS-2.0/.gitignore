@@ -1,7 +1,11 @@
 .env
 .venv/
 __pycache__/
-*.pyc
+*.py[cod]
 data/
+logs/
 workspace/*
 !workspace/.gitkeep
+jarvis_projects/
+*.rpt
+.DS_Store
