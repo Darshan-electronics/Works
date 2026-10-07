@@ -200,6 +200,53 @@ async def evaluate_alert(req: AlertRequest, authorization: str | None = Header(d
 class WorkRequest(BaseModel):
     request: str = Field(min_length=5, max_length=12000)
 
+@app.get("/trading/status")
+def trading_status():
+    return TradingEngine().status()
+
+
+@app.post("/trading/propose")
+def trading_propose(req: dict):
+    engine = TradingEngine()
+    return engine.propose(
+        symbol=req["symbol"],
+        price=float(req["price"]),
+        stop=float(req["stop"]),
+        target=float(req["target"]),
+        quantity=float(req.get("quantity", 1.0)),
+        strategy=req.get("strategy", "manual-research"),
+        rationale=req.get("rationale", ""),
+    )
+
+
+@app.post("/trading/paper-buy")
+def trading_paper_buy(req: dict):
+    engine = TradingEngine()
+    return engine.paper_buy(
+        symbol=req["symbol"],
+        price=float(req["price"]),
+        stop=float(req["stop"]),
+        target=float(req["target"]),
+        quantity=float(req.get("quantity", 1.0)),
+        strategy=req.get("strategy", "manual-research"),
+        rationale=req.get("rationale", ""),
+    )
+
+
+@app.post("/trading/paper-sell")
+def trading_paper_sell(req: dict):
+    return TradingEngine().paper_sell(
+        symbol=req["symbol"],
+        price=float(req["price"]),
+        strategy=req.get("strategy", "manual-research"),
+    )
+
+
+@app.get("/trading/history")
+def trading_history(limit: int = 50):
+    return TradingEngine().history(limit)
+
+
 @app.get("/quantum/status")
 def quantum_backend_status():
     return quantum_status()
