@@ -7,9 +7,5 @@ websockets
 python-docx
 python-pptx
 reportlab
-
-# Optional quantum engineering stack (install when needed)
-# qiskit
-# qiskit-aer
-# pennylane
-# cirq
+qiskit>=2.0,<3
+qiskit-aer>=0.17,<1
