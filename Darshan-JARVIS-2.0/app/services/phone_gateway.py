@@ -87,7 +87,7 @@ def _say(text: str, voice: str = "Polly.Aditi", language: str = "en-IN") -> str:
 
 def start_twiml(opening_message: str = "") -> Response:
     """Connect the call to the realtime bidirectional Media Stream."""
-    ws_url = JARVIS_PUBLIC_BASE_URL.replace("https://", "wss://").replace("http://", "ws://") + "/phone/media"
+    ws_url = JARVIS_PUBLIC_BASE_URL.replace("https://", "wss://").replace("http://", "ws://") + "/phone/media?opening=" + quote(opening_message[:1500])
     greeting = html.escape(JARVIS_PHONE_GREETING)
     opening = html.escape(opening_message[:1500]) if opening_message else ""
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
