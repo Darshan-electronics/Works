@@ -57,3 +57,54 @@ openssl rand -hex 32
 # put the generated value into JARVIS_ACCESS_TOKEN in .env
 ./scripts/start.sh
 ```
+
+## Learning pipeline
+
+JARVIS now has a real retrieval-based learning loop:
+
+1. `POST /chat` searches approved memories and the local FTS5 knowledge base before answering.
+2. `POST /learn` searches SearXNG, asks the local model to curate the evidence, stores the resulting note and source URLs, and makes it retrievable later.
+3. `GET /knowledge?q=...` lets the UI inspect stored knowledge.
+4. `GET /memory?q=...` lets the UI inspect approved memories.
+
+This is knowledge acquisition, not automatic weight retraining. SQLite FTS5 provides local full-text retrieval and relevance ranking. citeturn0search0
+
+### Start it
+
+If the repository was cloned into `~/Darshan-JARVIS-2.0`:
+
+```bash
+cd ~/Darshan-JARVIS-2.0
+bash scripts/install.sh
+# Edit .env and put a strong random value in JARVIS_ACCESS_TOKEN
+bash scripts/setup_offline_ai.sh
+bash scripts/start.sh
+```
+
+The local server listens only on `127.0.0.1:8787`. Do not expose Ollama's `11434` port.
+
+### Make it reachable from anywhere
+
+Install Tailscale on the Linux PC and Android phone, then for a public HTTPS endpoint use:
+
+```bash
+tailscale funnel 8787
+```
+
+Keep the bearer token enabled. A public endpoint should never be unauthenticated. For private access, prefer Tailscale Serve instead of Funnel.
+
+### First learning test
+
+Open JARVIS, enter the token, and ask:
+
+```
+Teach yourself the current OpenLane 2 architecture. Research it,
+separate facts from uncertain claims, save the useful knowledge,
+and cite the sources when you answer me later.
+```
+
+Then ask a follow-up question about OpenLane 2. JARVIS will search its local knowledge store before answering.
+
+### Important limitation
+
+JARVIS does not silently rewrite its own code, model weights, security rules, or financial permissions as a result of research. Learning is stored as source-backed knowledge and approved memory. This keeps the system upgradeable without turning every web result into permanent trusted truth.
