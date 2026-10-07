@@ -85,16 +85,22 @@ let voiceEnabled=true;
 function headers(){return {"Authorization":"Bearer "+token,"Content-Type":"application/json"}}
 async function connect(){
   try{
-    const r=await fetch("/ui/session");
-    if(r.ok){
-      const d=await r.json();
-      token=d.token;
-      sessionStorage.setItem("jarvis_token",token);
-      $("tokenStatus").textContent="CONNECTED";
-      return health();
+    const r=await fetch("/ui/session",{cache:"no-store"});
+    if(!r.ok){
+      const body=await r.text().catch(()=> "");
+      $("tokenStatus").textContent="TOKEN ERROR ("+r.status+")";
+      throw Error("Session bootstrap failed: HTTP "+r.status+(body?" — "+body:""));
     }
-    $("tokenStatus").textContent="LOCAL SESSION UNAVAILABLE";
-  }catch(e){$("tokenStatus").textContent="CONNECTION ERROR"}
+    const d=await r.json();
+    if(!d.token) throw Error("Session returned no token");
+    token=d.token;
+    sessionStorage.setItem("jarvis_token",token);
+    $("tokenStatus").textContent="CONNECTED";
+    await health();
+  }catch(e){
+    $("tokenStatus").textContent="CONNECTION ERROR";
+    console.error("JARVIS session:",e);
+  }
 }
 function toggleVoice(button){
   voiceEnabled=!voiceEnabled;
@@ -113,7 +119,34 @@ function speak(text){
   speechSynthesis.speak(u);
 }
 async function api(url,opt={}){let r=await fetch(url,opt);let d=await r.json().catch(()=>({detail:r.statusText}));if(!r.ok)throw Error(d.detail||JSON.stringify(d));return d}
-async function health(){try{let d=await api("/health");$("dot").className="dot ok";$("server").textContent="SYSTEM ONLINE";$("coreStatus").textContent="ONLINE";$("ai").textContent=d.ai;$("web").textContent=d.web_research?"ENABLED":"DISABLED";let q=await api("/quantum/status");$("qstate").textContent=q.backends?.qiskit?"READY":"CHECK";$("equity0").textContent="loading";tradingStatus()}catch(e){$("dot").className="dot";$("server").textContent="SYSTEM OFFLINE";$("coreStatus").textContent="OFFLINE"}}
+async function health(){
+  try{
+    const d=await api("/health");
+    $("dot").className="dot ok";
+    $("server").textContent="SYSTEM ONLINE";
+    $("coreStatus").textContent="ONLINE";
+    $("ai").textContent=d.ai;
+    $("equity0").textContent="loading";
+  }catch(e){
+    $("dot").className="dot";
+    $("server").textContent="SYSTEM OFFLINE";
+    $("coreStatus").textContent="OFFLINE";
+    console.error("JARVIS health:",e);
+    return;
+  }
+  try{
+    const q=await api("/quantum/status");
+    $("qstate").textContent=q.backends?.qiskit?"READY":"CHECK";
+  }catch(e){$("qstate").textContent="ERROR"}
+  tradingStatus();
+  researchStatus();
+}
+async function researchStatus(){
+  try{
+    const d=await api("/research/status");
+    $("web").textContent=!d.enabled?"DISABLED":(d.ready?"READY":"OFFLINE");
+  }catch(e){$("web").textContent="CHECK"}
+}
 async function chat(){
   $("chatout").textContent="JARVIS PROCESSING...";
   try{
@@ -148,6 +181,6 @@ async function decideCode(id,approved){
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 
-connect();setInterval(health,15000);
+connect();setInterval(connect,15000);
 </script>
 </body></html>
