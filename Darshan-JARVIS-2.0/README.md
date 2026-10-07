@@ -139,3 +139,7 @@ JARVIS is designed to run on Ubuntu. Use `scripts/install_ubuntu.sh` for the bas
 ## Quantum engineering
 
 JARVIS includes a quantum-engineering layer for quantum circuit/algorithm planning, local simulation when Qiskit/Qiskit Aer is installed, quantum-system analysis, and quantum-VLSI planning that connects qubit/control/readout requirements with ADC/DAC, RF/microwave, FPGA/ASIC, cryogenic-electronics and verification workflows. Quantum SDKs are optional and remain disabled unless installed. Hardware execution should require explicit configuration and confirmation.\n
+
+## Trading engine
+
+JARVIS includes a risk-controlled paper-trading layer plus an offline OHLCV backtesting engine. It supports SMA crossover backtests, strategy comparison, return/drawdown/win-rate/profit-factor metrics, paper positions and trade history. Live broker execution is intentionally disabled until a future explicit-confirmation broker adapter is implemented. A daily profit target never forces a trade.\n
