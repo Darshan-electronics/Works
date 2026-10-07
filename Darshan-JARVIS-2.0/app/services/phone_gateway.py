@@ -56,7 +56,7 @@ def _require_config() -> None:
         )
 
 
-async def create_call(to_number: str) -> dict:
+async def create_call(to_number: str, opening_message: str = "") -> dict:
     """Start an outbound PSTN call using Twilio's Calls API."""
     _require_config()
     if not to_number.startswith("+"):
@@ -66,7 +66,7 @@ async def create_call(to_number: str) -> dict:
     data = {
         "To": to_number,
         "From": TWILIO_FROM_NUMBER,
-        "Url": f"{JARVIS_PUBLIC_BASE_URL}/phone/twiml/start",
+        "Url": f"{JARVIS_PUBLIC_BASE_URL}/phone/twiml/start?opening={quote(opening_message[:1000])}",
         "Method": "POST",
         "StatusCallback": f"{JARVIS_PUBLIC_BASE_URL}/phone/status",
         "StatusCallbackMethod": "POST",
@@ -85,10 +85,11 @@ def _say(text: str, voice: str = "Polly.Aditi", language: str = "en-IN") -> str:
     return f'<Say voice="{voice}" language="{language}">{safe}</Say>'
 
 
-def start_twiml() -> Response:
+def start_twiml(opening_message: str = "") -> Response:
     """Connect the call to the realtime bidirectional Media Stream."""
     ws_url = JARVIS_PUBLIC_BASE_URL.replace("https://", "wss://").replace("http://", "ws://") + "/phone/media"
     greeting = html.escape(JARVIS_PHONE_GREETING)
+    opening = html.escape(opening_message[:1500]) if opening_message else ""
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="Polly.Aditi" language="en-IN">{greeting}</Say>
