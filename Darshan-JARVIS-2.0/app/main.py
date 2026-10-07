@@ -200,6 +200,17 @@ async def evaluate_alert(req: AlertRequest, authorization: str | None = Header(d
 class WorkRequest(BaseModel):
     request: str = Field(min_length=5, max_length=12000)
 
+@app.post("/trading/paper-cycle")
+def trading_paper_cycle(req: dict):
+    candles = load_csv(req["csv_path"])
+    return run_paper_cycle(candles, req["symbol"], float(req.get("quantity", 1.0)))
+
+
+@app.get("/trading/daily-report")
+def trading_daily_report():
+    return daily_report()
+
+
 @app.post("/trading/market-snapshot")
 def trading_market_snapshot(req: dict):
     candles = load_csv(req["csv_path"])
