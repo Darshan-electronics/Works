@@ -8,6 +8,7 @@ from .ai import answer, learn_from_research
 from .knowledge import init_knowledge, remember, search_knowledge
 from .memory import add_memory, search_memories, audit
 from .services.web_research import search_web
+from .services.work_engine import create_project
 
 app = FastAPI(title="Darshan JARVIS 2.0")
 mobile_clients: set[WebSocket] = set()
