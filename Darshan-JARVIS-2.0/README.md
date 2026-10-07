@@ -108,3 +108,13 @@ Then ask a follow-up question about OpenLane 2. JARVIS will search its local kno
 ### Important limitation
 
 JARVIS does not silently rewrite its own code, model weights, security rules, or financial permissions as a result of research. Learning is stored as source-backed knowledge and approved memory. This keeps the system upgradeable without turning every web result into permanent trusted truth.
+
+## Android device agent + college
+
+The planned Android companion is the device bridge for JARVIS. It can use Android intents for supported cross-app actions and request individual permissions for protected data. Android's application sandbox means there is no safe universal "all apps, all data" permission; capabilities must be granted individually. citeturn0search0turn0search9
+
+The design is documented in `docs/ANDROID_DEVICE_AGENT.md`. It includes a College Setup wizard for timetable, college timings, rooms, faculty, exams, attendance rules and official portal links.
+
+For calendar integration, Android exposes calendar data through its Calendar provider when the app has the appropriate permission. citeturn0search2turn0search12
+
+For deeper UI automation, an optional Android AccessibilityService can be used only after the user explicitly enables it in Settings; Android requires that explicit user action. citeturn0search1
