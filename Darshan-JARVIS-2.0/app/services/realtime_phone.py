@@ -42,22 +42,6 @@ async def run_call_bridge(
 
     async with websockets.connect(stt_url, max_size=8 * 1024 * 1024) as stt,                websockets.connect(tts_url, max_size=8 * 1024 * 1024) as tts:
 
-        await stt.send(json.dumps({
-            "message_type": "input_audio_chunk",
-            "audio_base_64": "",
-            "commit": False,
-            "sample_rate": 8000,
-            "language_code": "en",
-            "xi_api_key": ELEVEN_KEY,
-        }))
-        await stt.send(json.dumps({
-            "config": {
-                "audio_format": "ulaw_8000",
-                "sample_rate": 8000,
-                "language_code": "en",
-                "model_id": ELEVEN_STT_MODEL,
-            }
-        }))
         await tts.send(json.dumps({
             "voices": [ELEVEN_VOICE_ID],
             "xi_api_key": ELEVEN_KEY,
