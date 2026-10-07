@@ -47,7 +47,12 @@ async def run_call_bridge(
             "voices": [ELEVEN_VOICE_ID],
             "xi_api_key": ELEVEN_KEY,
             "language_code": "en",
-        }))\n        if opening_message:\n            await tts.send(json.dumps({\n                "inputs": [{"text": opening_message, "voice_id": ELEVEN_VOICE_ID, "new_turn": True}],\n                "flush": True,\n            }))
+        }))
+        if opening_message:
+            await tts.send(json.dumps({
+                "inputs": [{"text": opening_message, "voice_id": ELEVEN_VOICE_ID, "new_turn": True}],
+                "flush": True,
+            }))
 
         stream_sid = None
         response_lock = asyncio.Lock()
