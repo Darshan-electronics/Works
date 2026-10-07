@@ -9,6 +9,7 @@ from .knowledge import init_knowledge, remember, search_knowledge
 from .memory import add_memory, search_memories, audit
 from .services.web_research import search_web
 from .services.work_engine import create_project
+from .services.self_modification import create_proposal, get_proposal, apply_proposal, list_pending
 from .services.trading_engine import TradingEngine
 from .services.quantum_engine import service_status as quantum_status, analyze_algorithm, quantum_vlsi_plan, bell_state
 from .services.trading_analysis import load_csv, run_paper_cycle, daily_report, technical_snapshot, walk_forward_sma, paper_signal, fetch_csv_url, normalize_ohlcv, backtest_sma_cross, compare_strategies
@@ -355,6 +356,57 @@ async def validate_artifacts(req: WorkRequest, authorization: str | None = Heade
     from .services.validation import validate_project
     result = validate_project(req.request)
     audit("artifact_validation", "LOW", "completed", req.request[:200])
+    return result
+
+class CodeChangeRequest(BaseModel):
+    path: str = Field(min_length=1, max_length=500)
+    new_content: str = Field(max_length=200000)
+    reason: str = Field(default="", max_length=2000)
+
+class CodeApprovalRequest(BaseModel):
+    approved: bool
+
+@app.post("/code/propose")
+async def code_propose(req: CodeChangeRequest, authorization: str | None = Header(default=None)):
+    auth(authorization)
+    # Proposal only: JARVIS is NEVER allowed to modify its own code at this stage.
+    result = create_proposal(req.path, req.new_content, req.reason)
+    return {
+        **result,
+        "message": "Code change is waiting for explicit user approval. Nothing has been modified."
+    }
+
+@app.get("/code/pending")
+def code_pending(authorization: str | None = Header(default=None)):
+    auth(authorization)
+    return {"proposals": list_pending()}
+
+@app.get("/code/proposals/{proposal_id}")
+def code_proposal(proposal_id: str, authorization: str | None = Header(default=None)):
+    auth(authorization)
+    p = get_proposal(proposal_id)
+    # Do not expose old/new source to unauthenticated callers.
+    return {
+        "id": p["id"],
+        "status": p["status"],
+        "path": p["path"],
+        "reason": p.get("reason", ""),
+        "old_sha256": p["old_sha256"],
+        "new_sha256": p["new_sha256"],
+        "created_at": p["created_at"],
+        "old_content": p["old_content"],
+        "new_content": p["new_content"],
+    }
+
+@app.post("/code/proposals/{proposal_id}/decision")
+def code_decision(
+    proposal_id: str,
+    req: CodeApprovalRequest,
+    authorization: str | None = Header(default=None),
+):
+    auth(authorization)
+    # This endpoint is the ONLY path that can apply a self-modification.
+    result = apply_proposal(proposal_id, req.approved)
     return result
 
 @app.get("/knowledge")
