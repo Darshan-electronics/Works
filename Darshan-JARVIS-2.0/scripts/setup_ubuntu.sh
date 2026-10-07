@@ -7,7 +7,7 @@ echo "=== DARSHAN JARVIS 2.0 | Ubuntu One-Click Setup ==="
 command -v apt-get >/dev/null 2>&1 || { echo "Ubuntu/Debian is required."; exit 1; }
 
 sudo apt-get update
-sudo apt-get install -y python3 python3-venv python3-pip python3-dev git curl wget build-essential pkg-config libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev graphviz jq unzip xdg-utils openssl sqlite3 iproute2
+sudo apt-get install -y python3 python3-venv python3-pip python3-dev git curl wget build-essential pkg-config libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev graphviz jq unzip xdg-utils openssl sqlite3 iproute2 nodejs npm
 sudo apt-get install -y verilator iverilog yosys || true
 
 if ! command -v kicad-cli >/dev/null 2>&1; then
@@ -105,5 +105,27 @@ fi
 curl -fsS http://127.0.0.1:8787/health >/dev/null || { echo "JARVIS failed. See logs/jarvis.log"; exit 1; }
 echo
 echo "=== JARVIS READY ==="
-echo "Open: http://127.0.0.1:8787"
-command -v xdg-open >/dev/null 2>&1 && xdg-open http://127.0.0.1:8787 >/dev/null 2>&1 || true
+echo "Installing standalone desktop shell..."
+(cd "$ROOT/desktop" && npm install)
+
+echo "Creating application launcher..."
+mkdir -p "$HOME/.local/share/applications"
+cat > "$HOME/.local/share/applications/darshan-jarvis.desktop" <<EOF
+[Desktop Entry]
+Name=DARSHAN JARVIS 2.0
+Comment=Personal engineering AI
+Exec=$ROOT/scripts/start_desktop.sh
+Terminal=false
+Type=Application
+Categories=Development;Engineering;Utility;
+StartupNotify=true
+EOF
+
+echo "Launching standalone JARVIS desktop..."
+nohup "$ROOT/scripts/start_desktop.sh" >"$ROOT/logs/jarvis-desktop.log" 2>&1 &
+
+echo
+echo "=== JARVIS DESKTOP READY ==="
+echo "JARVIS now opens as a separate application window."
+echo "The backend remains local at 127.0.0.1:8787."
+echo "Launcher: DARSHAN JARVIS 2.0"
