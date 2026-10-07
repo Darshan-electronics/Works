@@ -1,5 +1,5 @@
 from pathlib import Path
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
@@ -88,6 +88,20 @@ async def phone_call(req: PhoneCallRequest, authorization: str | None = Header(d
     result = await create_call(req.to_number)
     audit("phone_call", "HIGH", "started", req.to_number[-4:])
     return {"ok": True, "call": result}
+
+
+@app.websocket("/phone/media")
+async def phone_media(websocket: WebSocket):
+    await websocket.accept()
+    from .services.realtime_phone import run_call_bridge
+    try:
+        await run_call_bridge(websocket, answer)
+    except Exception as exc:
+        audit("phone_media", "HIGH", "error", str(exc)[:300])
+        try:
+            await websocket.close(code=1011)
+        except Exception:
+            pass
 
 @app.post("/phone/twiml/start")
 async def phone_twiml_start():
