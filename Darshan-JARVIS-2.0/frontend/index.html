@@ -3,78 +3,124 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DARSHAN JARVIS 2.0</title>
+<title>DARSHAN // JARVIS</title>
 <style>
-:root{--bg:#030303;--panel:#0b0a09;--line:#3a2111;--orange:#ff8a22;--gold:#ffc15a;--muted:#a88d75;--green:#67f5a5}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 45%,#241004 0,#090604 24%,#020202 62%);color:#f7eadb;font-family:Inter,ui-sans-serif,system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 49.9%,#ff8a220c 50%,transparent 50.1%),linear-gradient(0deg,transparent 49.9%,#ff8a220c 50%,transparent 50.1%);background-size:90px 90px;mask-image:radial-gradient(circle at center,#000 0,transparent 72%)}
-header{height:70px;border-bottom:1px solid #4b2812;background:#050403d9;backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:10}
-.brand{letter-spacing:4px;font-weight:800;color:#ffd39a}.brand small{display:block;font-size:9px;letter-spacing:3px;color:#9c6b42;margin-top:4px}
-.status{display:flex;align-items:center;gap:8px;color:#bda78f;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#6b5848;box-shadow:0 0 0 transparent}.dot.ok{background:#67f5a5;box-shadow:0 0 12px #67f5a5}
-main{max-width:1450px;margin:auto;padding:20px}.hud{display:grid;grid-template-columns:260px 1fr 260px;gap:16px;min-height:760px}
-.side,.right{display:flex;flex-direction:column;gap:12px}.panel{background:linear-gradient(180deg,#100b07e8,#080706e8);border:1px solid #3c2413;box-shadow:inset 0 0 35px #ff7b1208,0 0 20px #000;border-radius:12px;padding:14px}.panel h3{font-size:11px;letter-spacing:2px;color:#e4a76d;margin:0 0 12px}.metric{font-size:25px;font-weight:700;color:#ffd09a}.muted{font-size:11px;color:#8f7761}.kv{display:flex;justify-content:space-between;border-bottom:1px solid #27180d;padding:8px 0;font-size:12px}.kv span:last-child{color:#f5b86b}
-.core{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:16px;border:1px solid #4b2a12;background:radial-gradient(circle at center,#281204 0,#090604 42%,#020202 75%)}
-.core:before{content:"";position:absolute;width:470px;height:470px;border-radius:50%;background:radial-gradient(circle,#ffd66b 0,#ff9d24 5%,#d84d00 16%,transparent 62%);filter:blur(10px);opacity:.7;box-shadow:0 0 100px #ff7200,0 0 220px #ff4b0040;animation:pulse 4s ease-in-out infinite}
-.core:after{content:"";position:absolute;inset:9%;border:1px solid #ff8a2228;border-radius:50%;box-shadow:0 0 0 34px #ff8a2205,0 0 0 90px #ff8a2203}
-@keyframes pulse{50%{transform:scale(1.06);opacity:.9}}
-.orb{position:relative;width:330px;height:330px;border-radius:50%;z-index:1;background:radial-gradient(circle at 42% 38%,#fff5bd 0,#ffc04c 8%,#ff7a0c 19%,#2b1102 44%,#050302 70%);box-shadow:0 0 35px #ff8a22,0 0 110px #ff6a0080,0 0 190px #ff430033;display:flex;align-items:center;justify-content:center}
-.orb:before,.orb:after{content:"";position:absolute;border:1px solid #ffb45c66;border-radius:50%;inset:-25px;transform:rotate(22deg) skewX(-14deg)}.orb:after{inset:-55px;transform:rotate(-31deg) skewX(18deg);border-color:#ff8a2238}
-.scan{position:absolute;left:7%;right:7%;height:1px;background:#ffb35a66;box-shadow:0 0 10px #ff8a22;animation:scan 5s linear infinite;z-index:2}@keyframes scan{0%{top:8%}100%{top:92%}}
-.centerText{text-align:center;z-index:3;text-shadow:0 0 20px #ff8a22}.centerText b{font-size:25px;letter-spacing:6px}.centerText div{font-size:9px;letter-spacing:4px;color:#ffd29b;margin-top:7px}
-input,textarea,button{width:100%;font:inherit;border:1px solid #553018;background:#090705;color:#f8eadc;border-radius:8px;padding:10px}textarea{resize:vertical}button{cursor:pointer;color:#ffc981;background:#130b05}button:hover{border-color:#ff9a3c;box-shadow:0 0 14px #ff7b2220}.row{display:flex;gap:8px}.row>*{flex:1}
-.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}.tabs button{width:auto;padding:8px 13px;font-size:11px;letter-spacing:1px}.tabs button.active{background:#2a1306;border-color:#ff8a22}
-pre{white-space:pre-wrap;word-break:break-word;background:#050403;border:1px solid #2b1a0e;border-radius:8px;padding:10px;max-height:270px;overflow:auto;font-size:11px;color:#eacda9}
-.section{display:none}.section.active{display:block}.token{margin-bottom:12px}
-@media(max-width:1000px){.hud{grid-template-columns:1fr}.side,.right{display:grid;grid-template-columns:1fr 1fr}.core{min-height:620px}}@media(max-width:650px){.side,.right{display:flex}.orb{width:230px;height:230px}}
+:root{--bg:#030303;--panel:#080a0d;--line:#3a210f;--amber:#ff8a19;--gold:#ffc46b;--text:#f4eadf;--muted:#9d8b78;--good:#65ffb0;--bad:#ff5d5d}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#020202;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{overflow-x:hidden;background:
+radial-gradient(circle at 50% 38%,rgba(255,112,15,.11),transparent 27%),
+radial-gradient(circle at 50% 55%,rgba(255,166,48,.06),transparent 42%),
+#020202}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(rgba(255,130,30,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,130,30,.025) 1px,transparent 1px);background-size:46px 46px;mask-image:radial-gradient(circle at center,#000,transparent 82%)}
+header{height:70px;border-bottom:1px solid #2b180c;background:rgba(2,2,2,.82);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:10}
+.brand{letter-spacing:.24em;font-size:13px;color:#cbb8a3}.brand b{color:var(--amber);font-weight:700}.topright{display:flex;gap:18px;align-items:center;color:#8d7d6b;font-size:11px;text-transform:uppercase;letter-spacing:.13em}.led{width:7px;height:7px;border-radius:50%;background:#666;box-shadow:0 0 0 transparent}.led.on{background:var(--good);box-shadow:0 0 12px var(--good)}
+main{max-width:1500px;margin:auto;padding:20px 28px 45px}.layout{display:grid;grid-template-columns:300px minmax(420px,1fr) 300px;gap:18px}
+.panel{border:1px solid var(--line);background:linear-gradient(180deg,rgba(14,10,7,.92),rgba(5,6,7,.94));box-shadow:inset 0 0 30px rgba(255,107,10,.025),0 0 30px rgba(0,0,0,.35);position:relative}.panel:after{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid rgba(255,143,46,.035)}
+.panel h2{font-size:10px;letter-spacing:.22em;color:#b59a7d;font-weight:500;margin:0;padding:13px 15px;border-bottom:1px solid #24160b}.body{padding:15px}
+.left,.right{display:flex;flex-direction:column;gap:18px}.metric{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1c120a;font-size:12px}.metric:last-child{border-bottom:0}.metric span:first-child{color:#887765}.value{color:#e9d7c3}.green{color:var(--good)}.orange{color:var(--gold)}
+.hero{min-height:590px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle at center,rgba(255,103,8,.07),transparent 45%),#030303}
+.hero:before{content:"";position:absolute;width:560px;height:560px;border-radius:50%;border:1px solid rgba(255,117,13,.10);box-shadow:0 0 90px rgba(255,93,0,.08),inset 0 0 80px rgba(255,116,0,.05);animation:breath 4s ease-in-out infinite}
+.core{position:relative;width:310px;height:310px;border-radius:50%;display:grid;place-items:center;filter:drop-shadow(0 0 25px rgba(255,109,0,.22))}
+.core:before,.core:after{content:"";position:absolute;border-radius:50%;inset:14px;border:1px solid rgba(255,135,30,.18);animation:spin 13s linear infinite}.core:after{inset:34px;border-style:dashed;border-color:rgba(255,180,75,.18);animation:spin 8s linear reverse infinite}
+.orb{width:170px;height:170px;border-radius:50%;background:radial-gradient(circle at 46% 42%,#fff0bd 0 2%,#ffc25c 5%,#ff7b0c 19%,rgba(255,72,0,.35) 42%,rgba(255,72,0,.05) 65%,transparent 72%);box-shadow:0 0 24px #ff8a19,0 0 80px rgba(255,89,0,.65),0 0 150px rgba(255,77,0,.22);animation:pulse 2.7s ease-in-out infinite}
+.scan{position:absolute;width:420px;height:2px;background:linear-gradient(90deg,transparent,rgba(255,153,55,.6),transparent);animation:scan 4.2s ease-in-out infinite;filter:blur(.2px)}
+.hero-title{margin-top:28px;letter-spacing:.42em;font-size:12px;color:#e8caa6;text-indent:.42em}.hero-sub{margin-top:9px;font-size:10px;color:#765f4b;letter-spacing:.16em;text-transform:uppercase}
+.console{margin-top:22px;width:min(760px,92%);border:1px solid #30200f;background:rgba(5,6,7,.8);padding:11px;display:flex;gap:9px}.console input,.input,textarea{background:#070809;border:1px solid #2a1a0d;color:#f4eadf;outline:none;padding:11px;font:inherit}.console input{flex:1}.console button,.btn{background:#110b06;border:1px solid #6b3a12;color:#d99a57;padding:10px 14px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;font-size:10px}.console button:hover,.btn:hover{border-color:var(--amber);box-shadow:0 0 14px rgba(255,129,22,.12)}
+pre{white-space:pre-wrap;word-break:break-word;margin:12px 0 0;background:#030404;border:1px solid #1b120b;color:#cdb9a2;padding:12px;max-height:260px;overflow:auto;font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+textarea{width:100%;resize:vertical;min-height:100px}.stack{display:flex;flex-direction:column;gap:9px}.row{display:flex;gap:8px}.row>*{flex:1}.small{font-size:10px;color:#776654;line-height:1.5}
+.nav{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:15px}.nav button{background:#070809;border:1px solid #2c1b0d;color:#8d755e;padding:8px 11px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}.nav button.active{color:#ffbd69;border-color:#7a4214;box-shadow:inset 0 0 18px rgba(255,108,0,.08)}
+.view{display:none}.view.active{display:block}.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.full{grid-column:1/-1}.section-title{font-size:11px;letter-spacing:.2em;color:#c39b70;text-transform:uppercase;margin:0 0 12px}
+.footer{margin-top:18px;text-align:center;color:#493a2e;font-size:9px;letter-spacing:.15em}
+@keyframes pulse{0%,100%{transform:scale(.94);opacity:.82}50%{transform:scale(1.06);opacity:1}}@keyframes breath{0%,100%{transform:scale(.96);opacity:.55}50%{transform:scale(1.02);opacity:1}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes scan{0%{transform:translateY(-160px);opacity:0}15%,80%{opacity:.7}100%{transform:translateY(160px);opacity:0}}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}.left,.right{display:grid;grid-template-columns:repeat(2,1fr)}.hero{min-height:620px}}@media(max-width:650px){main{padding:12px}.left,.right,.cards{grid-template-columns:1fr}.core{width:240px;height:240px}.orb{width:130px;height:130px}.hero:before{width:390px;height:390px}header{padding:0 14px}.topright .hide{display:none}}
 </style>
 </head>
 <body>
-<header><div class="brand">DARSHAN // JARVIS<small>ENGINEERING INTELLIGENCE SYSTEM • LOCAL CORE</small></div><div class="status"><span id="dot" class="dot"></span><span id="server">OFFLINE</span></div></header>
+<header><div class="brand">DARSHAN // <b>JARVIS</b> 2.0</div><div class="topright"><span id="time">--:--:--</span><span class="led" id="led"></span><span id="serverText">OFFLINE</span><span class="hide">LOCAL CORE</span></div></header>
 <main>
-<div class="token panel"><h3>SECURE LINK</h3><div class="row"><input id="token" type="password" placeholder="JARVIS access token"><button onclick="saveToken()">CONNECT</button></div></div>
-<div class="tabs"><button class="active" onclick="show('home',this)">CORE</button><button onclick="show('engineering',this)">VLSI / PCB</button><button onclick="show('quantum',this)">QUANTUM</button><button onclick="show('trading',this)">MARKETS</button></div>
+<div class="nav"><button class="active" data-view="home">CORE</button><button data-view="engineering">ENGINEERING</button><button data-view="vlsi">VLSI / ASIC</button><button data-view="quantum">QUANTUM</button><button data-view="trading">TRADING</button><button data-view="knowledge">KNOWLEDGE</button></div>
 
-<section id="home" class="section active">
-<div class="hud">
-<div class="side">
-<div class="panel"><h3>SYSTEM</h3><div class="kv"><span>AI CORE</span><span id="ai">—</span></div><div class="kv"><span>WEB RESEARCH</span><span id="web">—</span></div><div class="kv"><span>OLLAMA</span><span>LOCAL</span></div><div class="kv"><span>SECURITY</span><span>AUTH</span></div></div>
-<div class="panel"><h3>ENGINE STATUS</h3><div class="kv"><span>VLSI</span><span>READY</span></div><div class="kv"><span>PCB</span><span>KICAD</span></div><div class="kv"><span>QUANTUM</span><span id="qside">—</span></div><div class="kv"><span>TRADING</span><span>PAPER</span></div></div>
+<section id="home" class="view active">
+<div class="layout">
+<div class="left">
+<div class="panel"><h2>SYSTEM TELEMETRY</h2><div class="body">
+<div class="metric"><span>AI ENGINE</span><span class="value" id="ai">—</span></div>
+<div class="metric"><span>MODEL</span><span class="value">QWEN 3.5 9B</span></div>
+<div class="metric"><span>WEB RESEARCH</span><span id="web" class="value">—</span></div>
+<div class="metric"><span>QUANTUM</span><span id="qstatus" class="value">—</span></div>
+<div class="metric"><span>KIcad CLI</span><span class="value">READY</span></div>
+<div class="metric"><span>VERILATOR</span><span class="value">READY</span></div>
+<div class="metric"><span>YOSYS</span><span class="value">READY</span></div>
+</div></div>
+<div class="panel"><h2>COMMANDS</h2><div class="body small">Ask JARVIS to research, design, explain, simulate, generate engineering artifacts, analyze quantum algorithms, plan VLSI flows, or work with paper-trading data. Consequential actions remain gated.</div></div>
 </div>
-<div class="core"><div class="scan"></div><div class="orb"><div class="centerText"><b>JARVIS</b><div>ONLINE ENGINEERING CORE</div></div></div></div>
+
+<div class="panel hero">
+<div class="scan"></div><div class="core"><div class="orb"></div></div>
+<div class="hero-title">JARVIS ONLINE</div><div class="hero-sub">LOCAL ENGINEERING INTELLIGENCE</div>
+<div class="console"><input id="msg" placeholder="Enter command for JARVIS..." onkeydown="if(event.key==='Enter')chat()"><button onclick="chat()">EXECUTE</button></div>
+<pre id="chatout" style="width:min(760px,92%);display:none"></pre>
+</div>
+
 <div class="right">
-<div class="panel"><h3>QUANTUM BACKEND</h3><div id="quantum" class="metric">—</div><div class="muted">Qiskit / Aer local simulation</div></div>
-<div class="panel"><h3>PAPER ACCOUNT</h3><div id="equity" class="metric">$—</div><div class="kv"><span>POSITIONS</span><span id="positions">—</span></div><div class="kv"><span>DAILY RISK</span><span id="risk">—</span></div></div>
+<div class="panel"><h2>PAPER TRADING</h2><div class="body">
+<div class="metric"><span>EQUITY</span><span class="orange" id="equity">$—</span></div>
+<div class="metric"><span>OPEN POSITIONS</span><span class="value" id="positions">—</span></div>
+<div class="metric"><span>DAILY LOSS LIMIT</span><span class="value" id="risk">—</span></div>
+</div></div>
+<div class="panel"><h2>SESSION</h2><div class="body"><div class="metric"><span>MODE</span><span class="green">LOCAL</span></div><div class="metric"><span>REAL ORDERS</span><span class="value">DISABLED</span></div><div class="metric"><span>CONFIRMATION</span><span class="value">REQUIRED</span></div></div></div>
 </div>
 </div>
-<div class="panel" style="margin-top:14px"><h3>JARVIS CHAT</h3><textarea id="msg" rows="3" placeholder="Command JARVIS..."></textarea><button onclick="chat()">EXECUTE</button><pre id="chatout"></pre></div>
 </section>
 
-<section id="engineering" class="section">
-<div class="panel"><h3>PROJECT FACTORY</h3><textarea id="project" rows="5" placeholder="Design an ESP32 sensor board with OLED, battery, Wi-Fi and custom PCB..."></textarea><button onclick="createProject()">GENERATE COMPLETE PROJECT</button><pre id="projectout"></pre></div>
-<div class="panel" style="margin-top:12px"><h3>PROJECT VALIDATION</h3><div class="row"><input id="folder" placeholder="Project folder path"><button onclick="validateProject()">VALIDATE</button></div><pre id="validateout"></pre></div>
+<section id="engineering" class="view">
+<div class="cards">
+<div class="panel full"><h2>ENGINEERING PROJECT FACTORY</h2><div class="body stack"><textarea id="project" placeholder="Example: Design an ESP32 environmental monitor with sensors, OLED, Wi-Fi, battery power and a custom PCB."></textarea><button class="btn" onclick="createProject()">GENERATE PROJECT PACKAGE</button><pre id="projectout"></pre></div></div>
+<div class="panel"><h2>PCB / PROJECT VALIDATION</h2><div class="body stack"><input class="input" id="folder" placeholder="Project folder path"><button class="btn" onclick="validateProject()">RUN VALIDATION</button><pre id="validateout"></pre></div></div>
+<div class="panel"><h2>OUTPUTS</h2><div class="body small">DOCX report • PDF • PPTX • architecture SVG • BOM CSV • KiCad PCB draft • project JSON • validation report.</div></div>
+</div>
 </section>
 
-<section id="quantum" class="section">
-<div class="panel"><h3>QUANTUM ENGINEERING</h3><textarea id="qrequest" rows="5" placeholder="Analyze a quantum accelerator, quantum control ASIC, QEC architecture..."></textarea><div class="row"><button onclick="qAnalyze()">ANALYZE</button><button onclick="bell()">RUN BELL SIMULATION</button></div><pre id="qout"></pre><pre id="bellout"></pre></div>
-</section>
+<section id="vlsi" class="view"><div class="cards">
+<div class="panel"><h2>VLSI / ASIC WORKBENCH</h2><div class="body small">JARVIS can plan RTL, SystemVerilog/Verilog modules, testbenches, simulation, synthesis and physical-design workflows using the installed open-source toolchain.</div></div>
+<div class="panel"><h2>LOCAL TOOLCHAIN</h2><div class="body"><div class="metric"><span>IVERILOG</span><span class="green">READY</span></div><div class="metric"><span>VERILATOR</span><span class="green">READY</span></div><div class="metric"><span>YOSYS</span><span class="green">READY</span></div><div class="metric"><span>KICAD</span><span class="green">READY</span></div></div></div>
+<div class="panel full"><h2>VLSI COMMAND</h2><div class="body"><textarea id="vlsireq" placeholder="Example: Create a SystemVerilog 8-bit ALU, testbench, verification plan and synthesis flow."></textarea><button class="btn" onclick="chatWith('vlsireq')">SEND TO JARVIS</button><pre id="vlsiout"></pre></div></div>
+</div></section>
 
-<section id="trading" class="section">
-<div class="panel"><h3>PAPER TRADING CONTROL</h3><div class="row"><div><div class="muted">EQUITY</div><div id="tequity" class="metric">$—</div></div><div><div class="muted">POSITIONS</div><div id="tpositions" class="metric">—</div></div></div><button onclick="tradingStatus()">REFRESH PAPER STATUS</button><pre id="tradeout"></pre><div class="muted">Research/backtesting/paper trading only. Real-money execution is not enabled by this dashboard.</div></div>
-</section>
+<section id="quantum" class="view"><div class="cards">
+<div class="panel"><h2>QUANTUM ENGINEERING</h2><div class="body"><textarea id="qrequest" placeholder="Analyze a quantum algorithm or design a quantum-VLSI architecture..."></textarea><button class="btn" onclick="qAnalyze()">ANALYZE</button><pre id="qout"></pre></div></div>
+<div class="panel"><h2>QISKIT SIMULATION</h2><div class="body"><button class="btn" onclick="bell()">RUN BELL-STATE TEST</button><pre id="bellout"></pre></div></div>
+<div class="panel full"><h2>QUANTUM → HARDWARE BRIDGE</h2><div class="body small">Algorithm mapping • qubit/readout planning • control electronics • ADC/DAC • FPGA/ASIC partitioning • cryogenic electronics concepts • quantum-VLSI research planning.</div></div>
+</div></section>
+
+<section id="trading" class="view"><div class="cards">
+<div class="panel"><h2>PAPER ACCOUNT</h2><div class="body"><div class="metric"><span>EQUITY</span><span class="orange" id="equity2">$—</span></div><div class="metric"><span>POSITIONS</span><span id="positions2">—</span></div></div></div>
+<div class="panel"><h2>RISK CONTROLS</h2><div class="body small">Default paper account only. Risk limits and reward/risk checks are enforced by the trading engine. No promise of profit; no live broker execution.</div></div>
+<div class="panel full"><h2>TRADING STATUS</h2><div class="body"><button class="btn" onclick="tradingStatus()">REFRESH</button><pre id="tradeout"></pre></div></div>
+</div></section>
+
+<section id="knowledge" class="view"><div class="cards">
+<div class="panel"><h2>LEARN / RESEARCH</h2><div class="body stack"><input class="input" id="topic" placeholder="Research topic"><button class="btn" onclick="learn()">RESEARCH & REMEMBER</button><pre id="learnout"></pre></div></div>
+<div class="panel"><h2>LOCAL MEMORY</h2><div class="body small">Approved memories and source-backed knowledge are stored locally in SQLite. Research notes keep their source URLs.</div></div>
+</div></section>
+
+<div class="footer">DARSHAN JARVIS // LOCAL-FIRST ENGINEERING INTELLIGENCE // SAFETY GATED</div>
 </main>
 <script>
-const $=id=>document.getElementById(id); token.value=sessionStorage.getItem("jarvis_token")||"";
-function saveToken(){sessionStorage.setItem("jarvis_token",token.value);health()}
-function headers(){return{"Authorization":"Bearer "+token.value,"Content-Type":"application/json"}}
-async function api(u,o={}){const r=await fetch(u,o);const d=await r.json().catch(()=>({detail:r.statusText}));if(!r.ok)throw Error(d.detail||JSON.stringify(d));return d}
-async function health(){try{const d=await api("/health");$("dot").className="dot ok";$("server").textContent="ONLINE";$("ai").textContent=d.ai;$("web").textContent=d.web_research?"ENABLED":"DISABLED";const q=await api("/quantum/status");const ready=q.backends?.qiskit&&q.backends?.qiskit_aer;$("quantum").textContent=ready?"READY":"CHECK";$("qside").textContent=ready?"READY":"CHECK";tradingStatus()}catch(e){$("dot").className="dot";$("server").textContent="OFFLINE"}}
-async function chat(){$("chatout").textContent="PROCESSING...";try{$("chatout").textContent=(await api("/chat",{method:"POST",headers:headers(),body:JSON.stringify({message:$("msg").value})})).answer}catch(e){$("chatout").textContent=e.message}}
-async function createProject(){$("projectout").textContent="GENERATING...";try{$("projectout").textContent=JSON.stringify(await api("/artifacts/project",{method:"POST",headers:headers(),body:JSON.stringify({request:$("project").value})}),null,2)}catch(e){$("projectout").textContent=e.message}}
-async function validateProject(){$("validateout").textContent="VALIDATING...";try{$("validateout").textContent=JSON.stringify(await api("/artifacts/validate",{method:"POST",headers:headers(),body:JSON.stringify({request:$("folder").value})}),null,2)}catch(e){$("validateout").textContent=e.message}}
-async function qAnalyze(){$("qout").textContent="ANALYZING...";try{$("qout").textContent=JSON.stringify(await api("/quantum/analyze",{method:"POST",headers:headers(),body:JSON.stringify({request:$("qrequest").value})}),null,2)}catch(e){$("qout").textContent=e.message}}
-async function bell(){$("bellout").textContent="SIMULATING...";try{$("bellout").textContent=JSON.stringify(await api("/quantum/bell",{method:"POST"}),null,2)}catch(e){$("bellout").textContent=e.message}}
-async function tradingStatus(){try{const d=await api("/trading/status");const eq=d.account?.equity??0;const pos=d.positions?.length??0;$("equity").textContent="$"+Number(eq).toFixed(2);$("positions").textContent=pos;$("risk").textContent=(d.risk?.max_daily_loss_pct??3)+"%";$("tequity").textContent="$"+Number(eq).toFixed(2);$("tpositions").textContent=pos;$("tradeout").textContent=JSON.stringify(d,null,2)}catch(e){$("tradeout").textContent=e.message}}
-function show(id,b){document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active")}
-health();setInterval(health,15000);
+const $=id=>document.getElementById(id);let token=sessionStorage.getItem("jarvis_token")||"";
+async function bootstrap(){try{const r=await fetch("/ui/session");if(r.ok){const d=await r.json();token=d.token;sessionStorage.setItem("jarvis_token",token)}}catch(e){};health()}
+function headers(){return {"Authorization":"Bearer "+token,"Content-Type":"application/json"}}
+async function api(url,opt={}){const r=await fetch(url,opt);const d=await r.json().catch(()=>({detail:r.statusText}));if(!r.ok)throw new Error(d.detail||JSON.stringify(d));return d}
+async function health(){try{const d=await api("/health");$("led").classList.add("on");$("serverText").textContent="ONLINE";$("ai").textContent=d.ai.toUpperCase();$("web").textContent=d.web_research?"ENABLED":"OFF";const q=await api("/quantum/status");$("qstatus").textContent=q.available?"READY":"OFFLINE";tradingStatus()}catch(e){$("led").classList.remove("on");$("serverText").textContent="OFFLINE"}}
+async function chat(){const m=$("msg").value.trim();if(!m)return;$("chatout").style.display="block";$("chatout").textContent="PROCESSING...";try{$("chatout").textContent=(await api("/chat",{method:"POST",headers:headers(),body:JSON.stringify({message:m})})).answer}catch(e){$("chatout").textContent="ERROR: "+e.message}}
+async function chatWith(id){const m=$(id).value.trim();if(!m)return;const out=id==="vlsireq"?$("vlsiout"):$("chatout");out.style.display="block";out.textContent="PROCESSING...";try{out.textContent=(await api("/chat",{method:"POST",headers:headers(),body:JSON.stringify({message:m})})).answer}catch(e){out.textContent="ERROR: "+e.message}}
+async function createProject(){$("projectout").textContent="GENERATING...";try{$("projectout").textContent=JSON.stringify(await api("/artifacts/project",{method:"POST",headers:headers(),body:JSON.stringify({request:$("project").value})}),null,2)}catch(e){$("projectout").textContent="ERROR: "+e.message}}
+async function validateProject(){$("validateout").textContent="VALIDATING...";try{$("validateout").textContent=JSON.stringify(await api("/artifacts/validate",{method:"POST",headers:headers(),body:JSON.stringify({request:$("folder").value})}),null,2)}catch(e){$("validateout").textContent="ERROR: "+e.message}}
+async function qAnalyze(){$("qout").textContent="ANALYZING...";try{$("qout").textContent=JSON.stringify(await api("/quantum/analyze",{method:"POST",headers:headers(),body:JSON.stringify({request:$("qrequest").value})}),null,2)}catch(e){$("qout").textContent="ERROR: "+e.message}}
+async function bell(){$("bellout").textContent="SIMULATING...";try{$("bellout").textContent=JSON.stringify(await api("/quantum/bell",{method:"POST"}),null,2)}catch(e){$("bellout").textContent="ERROR: "+e.message}}
+async function tradingStatus(){try{const d=await api("/trading/status");const eq="$"+Number(d.equity||0).toFixed(2);$("equity").textContent=eq;$("equity2").textContent=eq;$("positions").textContent=(d.open_positions||[]).length;$("positions2").textContent=(d.open_positions||[]).length;$("risk").textContent=(d.max_daily_loss_pct||0)+"%";$("tradeout").textContent=JSON.stringify(d,null,2)}catch(e){}}
+async function learn(){$("learnout").textContent="RESEARCHING...";try{$("learnout").textContent=JSON.stringify(await api("/learn",{method:"POST",headers:headers(),body:JSON.stringify({topic:$("topic").value,save:true})}),null,2)}catch(e){$("learnout").textContent="ERROR: "+e.message}}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));$(b.dataset.view).classList.add("active")});
+setInterval(()=>{$("time").textContent=new Date().toLocaleTimeString()},1000);bootstrap();setInterval(health,15000);
 </script>
 </body></html>
