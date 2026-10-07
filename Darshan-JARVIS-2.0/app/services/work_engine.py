@@ -147,16 +147,34 @@ async def create_project(request: str) -> dict:
     plan = await make_plan(request)
     folder = WORK_ROOT / slug(plan.get("name", "jarvis_project"))
     folder.mkdir(parents=True, exist_ok=True)
+
     write_docx(folder / "project_report.docx", plan)
     write_pptx(folder / "project_presentation.pptx", plan)
     write_pdf(folder / "project_report.pdf", plan)
     write_diagram(folder / "final_architecture.svg", plan)
     write_pcb_draft(folder / "pcb_draft.kicad_pcb", plan)
-    bom_rows = []\n    for i, component in enumerate(plan.get("components", [])):\n        name = str(component.get("name", ""))\n        value = str(component.get("value_or_part", ""))\n        qty = component.get("qty", 1)\n        bom_rows.append(f"J{i+1},{name},{value},{qty}")\n    (folder / "BOM.csv").write_text("Reference,Component,Value,Quantity\\n" + "\\n".join(bom_rows), encoding="utf-8")\n    (folder / "project_plan.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    bom_rows = []
+    for i, component in enumerate(plan.get("components", [])):
+        name = str(component.get("name", ""))
+        value = str(component.get("value_or_part", ""))
+        qty = component.get("qty", 1)
+        bom_rows.append(f"J{i+1},{name},{value},{qty}")
+
+    (folder / "BOM.csv").write_text(
+        "Reference,Component,Value,Quantity\n" + "\n".join(bom_rows),
+        encoding="utf-8",
+    )
+    (folder / "project_plan.json").write_text(
+        json.dumps(plan, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
     (folder / "PCB_README.md").write_text(
-        "# PCB draft\n\nAutomatically generated engineering draft. "
-        "Verify footprints, pin mapping, ERC/DRC, power integrity and manufacturing outputs before fabrication.\n",
-        encoding="utf-8"
+        "# PCB draft\n\n"
+        "Automatically generated engineering draft. "
+        "Verify footprints, pin mapping, ERC/DRC, power integrity and "
+        "manufacturing outputs before fabrication.\n",
+        encoding="utf-8",
     )
     return {
         "name": plan["name"],
