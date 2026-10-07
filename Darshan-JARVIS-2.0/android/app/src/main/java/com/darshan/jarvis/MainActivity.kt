@@ -13,6 +13,7 @@ import android.view.Gravity
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import android.content.Context
 import org.json.JSONObject
 import java.util.Calendar
 import java.util.Locale
@@ -65,7 +66,19 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
 
     private fun saveAndTest() {
         store.serverUrl=server.text.toString(); store.token=token.text.toString(); output.text="Testing JARVIS..."
-        io.execute { try { val raw=JarvisApi(this).health(); runOnUiThread { output.text="JARVIS online: "+raw } } catch(ex:Exception) { runOnUiThread { output.text="Connection failed: "+ex.message } } }
+        io.execute { try { val raw=JarvisApi(this).health(); runOnUiThread { output.text="JARVIS online: "+raw; startMobileEvents() } } catch(ex:Exception) { runOnUiThread { output.text="Connection failed: "+ex.message } } }
+    }
+
+
+    private fun startMobileEvents() {
+        if (android.os.Build.VERSION.SDK_INT >= 33 &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            output.text = "Allow notifications before enabling mobile JARVIS alerts."
+            return
+        }
+        val intent = Intent(this, JarvisEventService::class.java)
+        ContextCompat.startForegroundService(this, intent)
+        output.text = "JARVIS mobile alert channel is active."
     }
 
     private fun startVoice() {
