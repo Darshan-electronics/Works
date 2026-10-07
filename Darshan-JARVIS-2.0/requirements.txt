@@ -7,5 +7,7 @@ websockets
 python-docx
 python-pptx
 reportlab
-qiskit>=2.0,<3
-qiskit-aer>=0.17,<1
+qiskit
+qiskit-aer
+numpy
+pandas
