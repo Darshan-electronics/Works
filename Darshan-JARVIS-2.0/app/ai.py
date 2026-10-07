@@ -11,19 +11,41 @@ _ollama_lock = asyncio.Semaphore(1)
 
 _HEAVY_MARKERS = ("9b", "14b", "27b", "32b", "34b", "70b", "72b")
 
+def _available_memory_mb():
+    try:
+        with open("/proc/meminfo", "r", encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("MemAvailable:"):
+                    return int(line.split()[1]) // 1024
+    except Exception:
+        return 0
+    return 0
+
 def _ollama_model():
     configured = os.getenv("OLLAMA_MODEL", OLLAMA_MODEL).strip()
-    safe = os.getenv("OLLAMA_SAFE_MODEL", "qwen3.5:4b").strip()
+    safe = os.getenv("OLLAMA_SAFE_MODEL", "llama3.2:1b").strip()
     allow_heavy = os.getenv("JARVIS_ALLOW_HEAVY_MODEL", "false").strip().lower() in {"1", "true", "yes", "on"}
     if not allow_heavy and any(marker in configured.lower() for marker in _HEAVY_MARKERS):
         return safe
     return configured
 
+def _resource_guard():
+    available = _available_memory_mb()
+    minimum = int(os.getenv("JARVIS_MIN_FREE_RAM_MB", "2500"))
+    if available and available < minimum:
+        raise RuntimeError(
+            f"JARVIS refused local AI generation because only {available} MB RAM is available "
+            f"(minimum {minimum} MB). This prevents Ubuntu from freezing. Close other applications "
+            "or use a smaller AI model."
+        )
+
 async def _ollama_chat(messages, temperature=0.2):
     model = _ollama_model()
-    timeout = httpx.Timeout(connect=5.0, read=75.0, write=10.0, pool=10.0)
+    _resource_guard()
+    timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
 
     async with _ollama_lock:
+        _resource_guard()
         async with httpx.AsyncClient(timeout=timeout) as client:
             try:
                 r = await client.post(
@@ -32,12 +54,13 @@ async def _ollama_chat(messages, temperature=0.2):
                         "model": model,
                         "messages": messages,
                         "stream": False,
+                        "keep_alive": "0",
                         "options": {
                             "temperature": temperature,
                             # Keep context/generation bounded so a local model
                             # cannot consume the machine's memory indefinitely.
-                            "num_ctx": int(os.getenv("OLLAMA_NUM_CTX", "2048")),
-                            "num_predict": int(os.getenv("OLLAMA_NUM_PREDICT", "512")),
+                            "num_ctx": int(os.getenv("OLLAMA_NUM_CTX", "1024")),
+                            "num_predict": int(os.getenv("OLLAMA_NUM_PREDICT", "256")),
                         },
                     },
                 )
