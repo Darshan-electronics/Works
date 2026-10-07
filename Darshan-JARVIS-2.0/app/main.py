@@ -73,6 +73,54 @@ async def learn(req: LearnRequest, authorization: str | None = Header(default=No
         audit("learn", "MEDIUM", "saved", req.topic)
     return {"topic": req.topic, "note": note, "sources": results[:8], "saved": req.save}
 
+
+
+class PhoneCallRequest(BaseModel):
+    to_number: str = Field(min_length=8, max_length=32)
+    confirmed: bool = False
+
+@app.post("/phone/call")
+async def phone_call(req: PhoneCallRequest, authorization: str | None = Header(default=None)):
+    auth(authorization)
+    if not req.confirmed:
+        raise HTTPException(409, "Phone call requires explicit confirmation.")
+    from .services.phone_gateway import create_call
+    result = await create_call(req.to_number)
+    audit("phone_call", "HIGH", "started", req.to_number[-4:])
+    return {"ok": True, "call": result}
+
+@app.post("/phone/twiml/start")
+async def phone_twiml_start():
+    from .services.phone_gateway import start_twiml
+    return start_twiml()
+
+@app.post("/phone/twiml/turn")
+async def phone_twiml_turn(
+    SpeechResult: str = "",
+    CallSid: str = "",
+):
+    from .services.phone_gateway import turn_twiml
+    return await turn_twiml(SpeechResult, CallSid, answer)
+
+@app.post("/phone/status")
+async def phone_status(
+    CallSid: str = "",
+    CallStatus: str = "",
+    CallDuration: str = "",
+    From: str = "",
+    To: str = "",
+):
+    from .services.phone_gateway import status
+    payload = status({
+        "CallSid": CallSid,
+        "CallStatus": CallStatus,
+        "CallDuration": CallDuration,
+        "From": From,
+        "To": To,
+    })
+    audit("phone_status", "LOW", CallStatus or "unknown", CallSid)
+    return {"ok": True, "status": payload}
+
 @app.get("/knowledge")
 def knowledge(q: str = "", authorization: str | None = Header(default=None)):
     auth(authorization)
