@@ -35,14 +35,14 @@ input,textarea{width:100%;background:#050505;color:#ffe8d2;border:1px solid #4b2
 <div class="panel"><div class="muted">Core Status</div><div id="coreStatus" class="metric">OFFLINE</div><div class="mini">Ollama / Qwen local inference</div></div>
 <div class="panel"><div class="muted">Engineering Stack</div><div class="oktext">KiCad • Verilator • Yosys • Qiskit</div><div class="mini">PCB / ASIC / Quantum workflows</div></div>
 <div class="panel"><div class="muted">Activity</div><div class="bars"><i class="bar"></i><i class="bar"></i><i class="bar"></i><i class="bar"></i><i class="bar"></i></div></div>
-<div class="panel"><div class="muted">Access Token</div><input id="token" type="password" placeholder="Local JARVIS token"><button class="btn" onclick="saveToken()">CONNECT</button></div>
+<div class="panel"><div class="muted">JARVIS Connection</div><div id="tokenStatus" class="oktext">AUTO-CONNECTING...</div><div class="mini">Local desktop session — token is managed automatically</div><button class="btn" onclick="connect()">RECONNECT</button></div>
 </aside>
 </div>
 
 <div class="tabs"><button class="active" onclick="show('command',this)">COMMAND</button><button onclick="show('engineering',this)">ENGINEERING</button><button onclick="show('vlsi',this)">VLSI / ASIC</button><button onclick="show('quantum',this)">QUANTUM</button><button onclick="show('trading',this)">PAPER TRADING</button><button onclick="show('learning',this)">LEARNING</button></div>
 
 <section id="command" class="section active"><div class="cards">
-<div class="card c8"><div class="muted">JARVIS COMMAND CONSOLE</div><h2>What do you want me to do?</h2><textarea id="msg" rows="5" placeholder="Design a VLSI accelerator... Create a PCB... Explain a quantum architecture..."></textarea><button class="btn" onclick="chat()">EXECUTE COMMAND</button><pre id="chatout">Awaiting command...</pre></div>
+<div class="card c8"><div class="muted">JARVIS COMMAND CONSOLE</div><h2>What do you want me to do?</h2><textarea id="msg" rows="5" placeholder="Design a VLSI accelerator... Create a PCB... Explain a quantum architecture..."></textarea><div class="row"><button class="btn" onclick="chat()">EXECUTE COMMAND</button><button class="btn" onclick="toggleVoice(this)">🔊 VOICE ON</button><button class="btn" onclick="stopSpeaking()">STOP VOICE</button></div><pre id="chatout">Awaiting command...</pre></div>
 <div class="card c4"><div class="muted">System Telemetry</div><p>AI: <b id="ai">—</b></p><p>Web Research: <b id="web">—</b></p><p>Quantum: <b id="qstate">—</b></p><p>Paper Equity: <b id="equity0">—</b></p></div>
 </div></section>
 
@@ -74,12 +74,49 @@ Ollama / Qwen 3.5 9B</pre></div>
 <section id="learning" class="section"><div class="cards"><div class="card c8"><div class="muted">KNOWLEDGE ACQUISITION</div><input id="topic" placeholder="Research a topic"><button class="btn" onclick="learn()">RESEARCH & REMEMBER</button><pre id="learnout"></pre></div><div class="card c4"><div class="muted">LOCAL-FIRST</div><p class="mini">Knowledge is stored with source references. Model weights are not silently retrained.</p></div></div></section>
 </main>
 <script>
-const $=id=>document.getElementById(id); token.value=sessionStorage.getItem("jarvis_token")||"";
-function saveToken(){sessionStorage.setItem("jarvis_token",token.value);health()}
-function headers(){return {"Authorization":"Bearer "+token.value,"Content-Type":"application/json"}}
+const $=id=>document.getElementById(id);
+let token=sessionStorage.getItem("jarvis_token")||"";
+let voiceEnabled=true;
+function headers(){return {"Authorization":"Bearer "+token,"Content-Type":"application/json"}}
+async function connect(){
+  try{
+    const r=await fetch("/ui/session");
+    if(r.ok){
+      const d=await r.json();
+      token=d.token;
+      sessionStorage.setItem("jarvis_token",token);
+      $("tokenStatus").textContent="CONNECTED";
+      return health();
+    }
+    $("tokenStatus").textContent="LOCAL SESSION UNAVAILABLE";
+  }catch(e){$("tokenStatus").textContent="CONNECTION ERROR"}
+}
+function toggleVoice(button){
+  voiceEnabled=!voiceEnabled;
+  button.textContent=voiceEnabled?"🔊 VOICE ON":"🔇 VOICE OFF";
+  if(!voiceEnabled) stopSpeaking();
+}
+function stopSpeaking(){if("speechSynthesis" in window) speechSynthesis.cancel()}
+function speak(text){
+  if(!voiceEnabled || !("speechSynthesis" in window)) return;
+  stopSpeaking();
+  const u=new SpeechSynthesisUtterance(String(text).replace(/[\*_#\`]/g,""));
+  u.rate=1.02; u.pitch=0.92; u.volume=1;
+  const voices=speechSynthesis.getVoices();
+  const v=voices.find(x=>/en-IN|en-US|en-GB/i.test(x.lang));
+  if(v) u.voice=v;
+  speechSynthesis.speak(u);
+}
 async function api(url,opt={}){let r=await fetch(url,opt);let d=await r.json().catch(()=>({detail:r.statusText}));if(!r.ok)throw Error(d.detail||JSON.stringify(d));return d}
 async function health(){try{let d=await api("/health");$("dot").className="dot ok";$("server").textContent="SYSTEM ONLINE";$("coreStatus").textContent="ONLINE";$("ai").textContent=d.ai;$("web").textContent=d.web_research?"ENABLED":"DISABLED";let q=await api("/quantum/status");$("qstate").textContent=q.backends?.qiskit?"READY":"CHECK";$("equity0").textContent="loading";tradingStatus()}catch(e){$("dot").className="dot";$("server").textContent="SYSTEM OFFLINE";$("coreStatus").textContent="OFFLINE"}}
-async function chat(){$("chatout").textContent="JARVIS PROCESSING...";try{$("chatout").textContent=(await api("/chat",{method:"POST",headers:headers(),body:JSON.stringify({message:$("msg").value})})).answer}catch(e){$("chatout").textContent=e.message}}
+async function chat(){
+  $("chatout").textContent="JARVIS PROCESSING...";
+  try{
+    const a=(await api("/chat",{method:"POST",headers:headers(),body:JSON.stringify({message:$("msg").value})})).answer;
+    $("chatout").textContent=a;
+    speak(a);
+  }catch(e){$("chatout").textContent=e.message}
+}
 async function chatText(a,b){$(b).textContent="PROCESSING...";try{$(b).textContent=(await api("/chat",{method:"POST",headers:headers(),body:JSON.stringify({message:$(a).value})})).answer}catch(e){$(b).textContent=e.message}}
 async function learn(){$("learnout").textContent="RESEARCHING...";try{$("learnout").textContent=JSON.stringify(await api("/learn",{method:"POST",headers:headers(),body:JSON.stringify({topic:$("topic").value,save:true})}),null,2)}catch(e){$("learnout").textContent=e.message}}
 async function createProject(){$("projectout").textContent="GENERATING ARTIFACTS...";try{$("projectout").textContent=JSON.stringify(await api("/artifacts/project",{method:"POST",headers:headers(),body:JSON.stringify({request:$("project").value})}),null,2)}catch(e){$("projectout").textContent=e.message}}
@@ -88,6 +125,6 @@ async function qAnalyze(){$("qout").textContent="ANALYZING...";try{$("qout").tex
 async function bell(){$("bellout").textContent="SIMULATING...";try{$("bellout").textContent=JSON.stringify(await api("/quantum/bell",{method:"POST"}),null,2)}catch(e){$("bellout").textContent=e.message}}
 async function tradingStatus(){try{let d=await api("/trading/status");const a=d.account||{},r=d.risk||{},p=d.positions||[];$("equity").textContent="$"+Number(a.equity||0).toFixed(2);$("equity0").textContent="$"+Number(a.equity||0).toFixed(2);$("positions").textContent=p.length;$("risk").textContent=Number(r.max_daily_loss_pct||0)+"%";$("tradeout").textContent=JSON.stringify(d,null,2)}catch(e){$("tradeout").textContent=e.message}}
 function show(id,b){document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active")}
-health();setInterval(health,15000);
+connect();setInterval(health,15000);
 </script>
 </body></html>
