@@ -10,6 +10,8 @@ from .memory import add_memory, search_memories, audit
 from .services.web_research import search_web
 from .services.work_engine import create_project
 from .services.trading_engine import TradingEngine
+from .services.quantum_engine import service_status as quantum_status, analyze_algorithm, quantum_vlsi_plan, bell_state
+from .services.trading_engine import TradingEngine
 from .services.quantum_engine import available_backends, bell_state, analyze_algorithm, quantum_vlsi_plan
 
 app = FastAPI(title="Darshan JARVIS 2.0")
