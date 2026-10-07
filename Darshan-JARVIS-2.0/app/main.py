@@ -95,7 +95,8 @@ async def phone_media(websocket: WebSocket):
     await websocket.accept()
     from .services.realtime_phone import run_call_bridge
     try:
-        await run_call_bridge(websocket, answer)
+        opening = websocket.query_params.get("opening", "")
+        await run_call_bridge(websocket, answer, opening_message=opening)
     except Exception as exc:
         audit("phone_media", "HIGH", "error", str(exc)[:300])
         try:
@@ -104,9 +105,9 @@ async def phone_media(websocket: WebSocket):
             pass
 
 @app.post("/phone/twiml/start")
-async def phone_twiml_start():
+async def phone_twiml_start(opening: str = ""):
     from .services.phone_gateway import start_twiml
-    return start_twiml()
+    return start_twiml(opening)
 
 @app.post("/phone/twiml/turn")
 async def phone_twiml_turn(
@@ -155,7 +156,7 @@ async def evaluate_alert(req: AlertRequest, authorization: str | None = Header(d
         target = __import__("os").getenv("JARVIS_PHONE_NUMBER", "")
         if not target:
             raise HTTPException(503, "JARVIS_PHONE_NUMBER is not configured")
-        call_result = await create_call(target)
+        call_result = await create_call(target, f"Important JARVIS alert: {req.message}")
 
     audit("alert", decision.level, decision.reason, req.event_key)
     return {
