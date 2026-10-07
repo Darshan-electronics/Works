@@ -1,100 +1,127 @@
 # DARSHAN JARVIS 2.0
 
-Local-first personal engineering AI for Ubuntu: JARVIS chat, VLSI/EDA workflows, quantum engineering, project/report/PPT generation, PCB drafts and validation, research/memory, and paper trading.
+Local-first personal engineering AI for **Ubuntu**, with a holographic JARVIS command-center dashboard.
 
-## One-command Ubuntu setup
+## One-command installation
 
-    git clone https://github.com/Darshan-electronics/Works.git
-    cd Works/Darshan-JARVIS-2.0
-    bash scripts/install_ubuntu.sh
+On Ubuntu:
 
-The installer automatically installs Ubuntu dependencies, creates the Python environment, installs engineering and quantum dependencies, installs KiCad/Verilator/Icarus/Yosys when available, installs and starts Ollama, downloads Qwen 3.5 9B and embeddinggemma, creates a secure local token, installs a user systemd service, starts JARVIS on 127.0.0.1:8787, and opens the dashboard.
+```bash
+curl -fsSL https://raw.githubusercontent.com/Darshan-electronics/Works/main/Darshan-JARVIS-2.0/scripts/bootstrap_ubuntu.sh | bash
+```
 
-Dashboard: http://127.0.0.1:8787
+The bootstrap clones/updates the repository and runs the Ubuntu setup.
 
-## Updating an existing installation
+The setup installs the core stack: Python/venv, FastAPI/Uvicorn, Ollama, Qwen 3.5 9B, embeddinggemma, Qiskit + Aer, KiCad/kicad-cli when available, Verilator, Icarus Verilog, Yosys, document-generation libraries, SQLite memory/knowledge, the engineering factory, quantum engine, paper-trading engine, and the dashboard.
 
-    cd ~/Works/Darshan-JARVIS-2.0
-    git pull origin main
-    bash scripts/install_ubuntu.sh
-
-The installer preserves an existing non-empty .env token.
+It creates a strong local `.env` token **only if one does not already exist**, compiles the application, starts JARVIS on localhost, and opens the dashboard.
 
 ## Dashboard
 
-The dashboard is an orange/black holographic HUD inspired by the supplied JARVIS visual: central animated neural core, system matrix, mission console, engineering factory, quantum console, knowledge acquisition and paper-trading panels.
+Open:
 
-When accessed locally, the dashboard obtains the API token through the localhost-only /ui/session endpoint. For remote access, keep the bearer token protected and use a private HTTPS/Tailscale path.
+```
+http://127.0.0.1:8787
+```
 
-## Current capabilities
+The UI is designed from the supplied orange holographic/JARVIS reference:
+
+- black glass background
+- orange/amber energy core
+- animated rings and scan line
+- telemetry panels
+- command console
+- Engineering Factory
+- VLSI / ASIC workbench
+- Quantum Engineering
+- Paper Trading
+- Knowledge / Learning
+
+When opened locally, the dashboard obtains a session token automatically from `/ui/session`. You normally do not need to paste a token.
+
+## Capabilities
 
 ### AI
-- Ollama + Qwen 3.5 9B
-- local retrieval memory and knowledge
-- optional web research through SearXNG
-- optional cloud model fallback
+- Local Qwen 3.5 9B chat/reasoning
+- Local embeddings
+- SQLite-backed knowledge and memory
+- Source-backed learning
+- Web research when SearXNG is configured
 
-### Engineering
-- project planning
-- DOCX, PDF and PPTX generation
-- architecture diagrams
-- BOM generation
-- KiCad PCB draft generation
-- KiCad validation hooks
-- VLSI/RTL tooling integration points
+### Engineering Factory
+A project request can generate:
 
-### Quantum engineering
-- Qiskit circuit analysis
-- Qiskit Aer simulation
+- project plan JSON
+- BOM CSV
+- architecture SVG
+- KiCad PCB draft
+- DOCX report
+- PDF report
+- PowerPoint presentation
+- validation report
+
+PCB output is a **draft**. Verify footprints, pin mapping, ERC/DRC, power integrity and manufacturing outputs in KiCad before fabrication.
+
+### VLSI / ASIC
+The installed open-source toolchain supports workflows around:
+
+- Verilog / SystemVerilog
+- Icarus Verilog
+- Verilator
+- Yosys
+- KiCad
+
+OpenROAD/OpenLane, Vivado, Quartus, LTspice and vendor SDKs remain separate optional installations.
+
+### Quantum Engineering
+- quantum algorithm analysis
+- Qiskit simulation
 - Bell-state simulation
-- quantum architecture planning
-- quantum-VLSI/control/readout/cryogenic electronics planning
+- quantum-VLSI partitioning
+- control/readout architecture planning
+- ADC/DAC and FPGA/ASIC interface planning
+- cryogenic-electronics research planning
 
 ### Trading
-- research and paper trading only
-- OHLCV backtesting
-- strategy comparison
-- paper positions and history
-- risk limits
-- no automatic live-money execution
+Paper trading only by default:
 
-### Android
-The Android companion can connect to the JARVIS API for notifications, calendar/device intents and future device-agent capabilities. Android still requires explicit permissions for protected capabilities.
+- $20 paper account
+- risk limits
+- reward/risk checks
+- paper positions
+- history
+- backtesting
+
+It does not promise profits and does not place real-money orders.
+
+### Android / voice / alerts
+The repository also contains the Android companion foundation and optional voice, phone-alert and event infrastructure. These are additional setup stages after the local core is working.
+
+## Start manually
+
+```bash
+cd ~/Works/Darshan-JARVIS-2.0
+source .venv/bin/activate
+./scripts/start.sh
+```
+
+Logs:
+
+```
+logs/jarvis.log
+logs/ollama.log
+```
 
 ## Security
 
-JARVIS is deliberately not an unrestricted public shell.
+JARVIS binds to `127.0.0.1:8787` by default.
 
-- API binds to localhost by default.
-- Ollama port 11434 should never be publicly exposed.
-- High-risk actions require confirmation.
-- Financial execution remains paper-only.
-- Phone and notification features require explicit configuration.
-- Never commit .env or API keys.
+Do **not** expose port 8787 or Ollama port 11434 directly to the public Internet.
 
-## Service commands
+For remote Android access, use a private authenticated overlay such as Tailscale. Consequential actions require confirmation, live financial execution is disabled by default, and cybersecurity functions are defensive-only.
 
-    systemctl --user status jarvis.service
-    systemctl --user restart jarvis.service
-    journalctl --user -u jarvis.service -n 100 --no-pager
+## Repository
 
-## Manual start
-
-    cd ~/Works/Darshan-JARVIS-2.0
-    source .venv/bin/activate
-    ./scripts/start.sh
-
-## Project API
-
-- POST /chat — JARVIS conversation
-- POST /learn — research and source-backed knowledge
-- POST /artifacts/project — project package generation
-- POST /artifacts/validate — project/PCB validation
-- GET /quantum/status — quantum backend status
-- POST /quantum/analyze — quantum engineering analysis
-- POST /quantum/bell — Bell-state simulation
-- GET /trading/status — paper account status
-
-## Important
-
-The project grows through explicit modules and source-backed knowledge. It does not silently rewrite its own code, security policy or financial permissions.
+```
+https://github.com/Darshan-electronics/Works/tree/main/Darshan-JARVIS-2.0
+```
