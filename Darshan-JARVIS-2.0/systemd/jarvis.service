@@ -6,9 +6,9 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=%i
-WorkingDirectory=%h/Darshan-JARVIS-2.0
-EnvironmentFile=%h/Darshan-JARVIS-2.0/.env
-ExecStart=%h/Darshan-JARVIS-2.0/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8787
+WorkingDirectory=%h/Works/Darshan-JARVIS-2.0
+EnvironmentFile=%h/Works/Darshan-JARVIS-2.0/.env
+ExecStart=%h/Works/Darshan-JARVIS-2.0/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8787
 Restart=always
 RestartSec=5
 
