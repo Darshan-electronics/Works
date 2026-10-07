@@ -1,5 +1,5 @@
 from pathlib import Path
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Form, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
@@ -90,8 +90,13 @@ async def phone_call(req: PhoneCallRequest, authorization: str | None = Header(d
     return {"ok": True, "call": result}
 
 @app.post("/phone/twiml/start")
-async def phone_twiml_start():
-    from .services.phone_gateway import start_twiml
+async def phone_twiml_start(
+    request_url: str = Form(default=""),
+    signature: str | None = Header(default=None, alias="X-Twilio-Signature"),
+):
+    from .services.phone_gateway import start_twiml, verify_twilio_signature
+    if not verify_twilio_signature(request_url, {}, signature or ""):
+        raise HTTPException(403, "Invalid webhook signature")
     return start_twiml()
 
 @app.post("/phone/twiml/turn")
