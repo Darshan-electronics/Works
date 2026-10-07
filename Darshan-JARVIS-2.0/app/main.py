@@ -137,15 +137,11 @@ async def evaluate_alert(req: AlertRequest, authorization: str | None = Header(d
     call_result = None
 
     if decision.call:
-        if not req.confirmed and decision.level != "EMERGENCY":
-            decision.call = False
-            decision.reason = "critical call requires explicit confirmation"
-        else:
-            from .services.phone_gateway import create_call
-            target = __import__("os").getenv("JARVIS_PHONE_NUMBER", "")
-            if not target:
-                raise HTTPException(503, "JARVIS_PHONE_NUMBER is not configured")
-            call_result = await create_call(target)
+        from .services.phone_gateway import create_call
+        target = __import__("os").getenv("JARVIS_PHONE_NUMBER", "")
+        if not target:
+            raise HTTPException(503, "JARVIS_PHONE_NUMBER is not configured")
+        call_result = await create_call(target)
 
     audit("alert", decision.level, decision.reason, req.event_key)
     return {
