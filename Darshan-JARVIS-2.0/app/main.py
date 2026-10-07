@@ -197,6 +197,16 @@ async def evaluate_alert(req: AlertRequest, authorization: str | None = Header(d
         "call_result": call_result,
     }
 
+class WorkRequest(BaseModel):
+    request: str = Field(min_length=5, max_length=12000)
+
+@app.post("/artifacts/project")
+async def create_artifacts(req: WorkRequest, authorization: str | None = Header(default=None)):
+    auth(authorization)
+    result = await create_project(req.request)
+    audit("artifact_project", "MEDIUM", "created", result["name"])
+    return result
+
 @app.get("/knowledge")
 def knowledge(q: str = "", authorization: str | None = Header(default=None)):
     auth(authorization)
