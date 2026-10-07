@@ -7,7 +7,7 @@ echo "=== DARSHAN JARVIS 2.0 | Ubuntu One-Click Setup ==="
 command -v apt-get >/dev/null 2>&1 || { echo "Ubuntu/Debian is required."; exit 1; }
 
 sudo apt-get update
-sudo apt-get install -y python3 python3-venv python3-pip python3-dev git curl wget build-essential pkg-config libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev graphviz jq unzip xdg-utils openssl sqlite3
+sudo apt-get install -y python3 python3-venv python3-pip python3-dev git curl wget build-essential pkg-config libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev graphviz jq unzip xdg-utils openssl sqlite3 iproute2
 sudo apt-get install -y verilator iverilog yosys || true
 
 if ! command -v kicad-cli >/dev/null 2>&1; then
@@ -16,6 +16,10 @@ if ! command -v kicad-cli >/dev/null 2>&1; then
   sudo apt-get update
   sudo apt-get install -y kicad || true
 fi
+
+mkdir -p data workspace logs
+
+touch workspace/.gitkeep
 
 if ! command -v ollama >/dev/null 2>&1; then
   curl -fsSL https://ollama.com/install.sh | sh
@@ -32,9 +36,6 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip wheel
 python -m pip install -r requirements.txt
-
-mkdir -p data workspace logs
-touch workspace/.gitkeep
 
 [ -f .env ] || cp .env.example .env
 
