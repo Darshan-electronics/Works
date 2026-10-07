@@ -121,6 +121,42 @@ async def phone_status(
     audit("phone_status", "LOW", CallStatus or "unknown", CallSid)
     return {"ok": True, "status": payload}
 
+
+
+class AlertRequest(BaseModel):
+    event_key: str = Field(min_length=2, max_length=200)
+    level: str = Field(default="MEDIUM", max_length=20)
+    message: str = Field(min_length=1, max_length=4000)
+    confirmed: bool = False
+
+@app.post("/alerts/evaluate")
+async def evaluate_alert(req: AlertRequest, authorization: str | None = Header(default=None)):
+    auth(authorization)
+    from .services.urgency import decide
+    decision = decide(req.level, req.event_key)
+    call_result = None
+
+    if decision.call:
+        if not req.confirmed and decision.level != "EMERGENCY":
+            decision.call = False
+            decision.reason = "critical call requires explicit confirmation"
+        else:
+            from .services.phone_gateway import create_call
+            target = __import__("os").getenv("JARVIS_PHONE_NUMBER", "")
+            if not target:
+                raise HTTPException(503, "JARVIS_PHONE_NUMBER is not configured")
+            call_result = await create_call(target)
+
+    audit("alert", decision.level, decision.reason, req.event_key)
+    return {
+        "level": decision.level,
+        "notify": decision.notify,
+        "call": decision.call,
+        "reason": decision.reason,
+        "message": req.message,
+        "call_result": call_result,
+    }
+
 @app.get("/knowledge")
 def knowledge(q: str = "", authorization: str | None = Header(default=None)):
     auth(authorization)
