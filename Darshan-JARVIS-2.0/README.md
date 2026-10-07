@@ -9,7 +9,7 @@ LOW (answers/read-only), MEDIUM (build/edit), HIGH (calls/messages/Git pushes/or
 ## Install
 Ubuntu:
 `sudo apt update && sudo apt install -y python3 python3-venv git curl sqlite3`
-Rocky:
+Ubuntu:
 `sudo dnf install -y python3 git curl sqlite`
 
 Then:
@@ -49,11 +49,23 @@ Example after JARVIS is running on port 8787:
 tailscale funnel 8787
 ```
 
-## Rocky Linux offline setup
+## Ubuntu setup
+
+JARVIS is designed for Ubuntu. Install the base dependencies with:
+
 ```bash
-./scripts/setup_offline_ai.sh
-cp .env.example .env
-openssl rand -hex 32
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip git curl sqlite3
+```
+
+For the complete engineering environment, use:
+
+```bash
+chmod +x scripts/install_ubuntu.sh scripts/check_ubuntu.sh
+./scripts/install_ubuntu.sh
+./scripts/check_ubuntu.sh
+```
+
 # put the generated value into JARVIS_ACCESS_TOKEN in .env
 ./scripts/start.sh
 ```
