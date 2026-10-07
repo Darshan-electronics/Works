@@ -86,20 +86,17 @@ def _say(text: str, voice: str = "Polly.Aditi", language: str = "en-IN") -> str:
 
 
 def start_twiml() -> Response:
-    """Initial call greeting and speech capture."""
+    """Connect the call to the realtime bidirectional Media Stream."""
+    ws_url = JARVIS_PUBLIC_BASE_URL.replace("https://", "wss://").replace("http://", "ws://") + "/phone/media"
     greeting = html.escape(JARVIS_PHONE_GREETING)
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="Polly.Aditi" language="en-IN">{greeting}</Say>
-  <Gather input="speech" action="{JARVIS_PUBLIC_BASE_URL}/phone/twiml/turn"
-          method="POST" speechTimeout="auto" language="en-IN" timeout="6">
-    <Say voice="Polly.Aditi" language="en-IN">I am listening.</Say>
-  </Gather>
-  <Say voice="Polly.Aditi" language="en-IN">I did not hear anything. Goodbye.</Say>
-  <Hangup/>
+  <Connect>
+    <Stream url="{ws_url}" />
+  </Connect>
 </Response>"""
     return Response(content=xml, media_type="application/xml")
-
 
 async def turn_twiml(speech: str, call_sid: str, ai_answer) -> Response:
     """Generate the next conversational turn.
