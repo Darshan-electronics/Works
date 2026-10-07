@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Darshan JARVIS</title>
+<style>
+body{font-family:system-ui;margin:0;background:#0b1020;color:#eee}main{max-width:900px;margin:auto;padding:20px}
+input,textarea,button{font:inherit;border-radius:10px;border:1px solid #39415c;padding:10px;background:#121a2f;color:#fff}
+input,textarea{width:100%;box-sizing:border-box}button{cursor:pointer;margin-top:8px}
+.card{background:#11182b;border:1px solid #29324d;border-radius:14px;padding:14px;margin:12px 0}
+pre{white-space:pre-wrap;word-wrap:break-word}
+</style></head>
+<body><main>
+<h1>⚡ DARSHAN JARVIS</h1>
+<div class="card"><label>Access token</label><input id="token" type="password" placeholder="Paste your JARVIS token"></div>
+<div class="card"><h3>Chat</h3><textarea id="msg" rows="4" placeholder="Ask JARVIS anything..."></textarea><button onclick="chat()">Ask JARVIS</button><pre id="chatout"></pre></div>
+<div class="card"><h3>Learn & remember</h3><input id="topic" placeholder="e.g. OpenLane 2 architecture"><button onclick="learn()">Research, verify and remember</button><pre id="learnout"></pre></div>
+<script>
+token.value=sessionStorage.getItem("jarvis_token")||"";
+token.onchange=()=>sessionStorage.setItem("jarvis_token",token.value);
+const headers=()=>({"Authorization":"Bearer "+token.value,"Content-Type":"application/json"});
+async function chat(){chatout.textContent="Thinking...";try{let r=await fetch("/chat",{method:"POST",headers:headers(),body:JSON.stringify({message:msg.value})});let d=await r.json();chatout.textContent=d.answer||JSON.stringify(d,null,2)}catch(e){chatout.textContent=e}}
+async function learn(){learnout.textContent="Researching and curating...";try{let r=await fetch("/learn",{method:"POST",headers:headers(),body:JSON.stringify({topic:topic.value,save:true})});let d=await r.json();learnout.textContent=JSON.stringify(d,null,2)}catch(e){learnout.textContent=e}}
+</script></main></body></html>
