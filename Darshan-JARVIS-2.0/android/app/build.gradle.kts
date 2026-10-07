@@ -12,4 +12,5 @@ android {
 }
 dependencies {
     implementation("androidx.core:core-ktx:1.17.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
